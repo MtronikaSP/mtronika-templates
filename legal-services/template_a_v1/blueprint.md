@@ -1,44 +1,73 @@
-# Legal Services template_a_v1
+# Template Blueprint: Legal Services Template A V1
 
-## Template Style: Legalcare - Law Firm Agency
-- **Framework**: Bootstrap 4
-- **Typography**: Poppins (Google Fonts)
-- **Theme**: Dark/Charcoal navbar + Gold/Brown primary accent
-
----
+## Template Style
+- **Framework**: Bootstrap 4.x (inferred from class names like `ml-`, `badge-soft-primary`)
+- **Typography**: Lato, Nunito Sans (Google Fonts)
+- **Color Scheme**:
+    - Primary: Blue/Dark Blue (implied by `text-primary`, `btn-raven-primary`)
+    - Secondary: Success Green (`text-success`, `btn-raven-success`)
+    - Backgrounds: White, Light Gray (`bg-light`, `section-gradient-bg`)
 
 ## Sections
-
-- **Navbar**: ID `#ftco-navbar` (Sticky dark nav + Logo with tagline "A Law Firm Agency" + Navigation + "Free Consultation" CTA button)
-- **Hero**: Full-height background image + Dark overlay + Animated text rotator (Freedom, Rights, Case, Custody) + "Get Legal Advice" CTA
-- **Services/Why Us**: Left intro text + 3-column icon service cards (Fight for Justice, Best Case Strategy, Experienced Attorney)
-- **About/Video**: Left video section with play button + Right tabbed content (Our Mission, Our Vision, Our Value) + Years counter
-- **Case Studies**: Owl Carousel case cards with hover overlay text + "See All Successful Cases" CTA
-- **Team/Attorneys**: 4-column flip cards with front image + back quote + social proof
-- **Consultation Form**: Background image section + Dark overlay + Consultation form (Name, Email, Subject, Message)
-- **Testimonials**: Owl Carousel testimonial cards with user images + quotes
-- **Blog**: 3-column blog cards with date overlays + "Read More" CTAs
-- **Newsletter**: Primary bg banner with email subscription form
-- **Footer**: Dark footer with Logo column + Practice Areas links + Contact info + Business Hours
-
----
+1.  **Header**:
+    -   Logo (`assets/img/raven-logo.svg`)
+    -   Navigation Menu (Home, Pages, Team, Testimonial, Components, Documentation, Utilities, Plugins) with Dropdowns.
+    -   Top Bar (hidden on mobile).
+2.  **Hero Section**:
+    -   Headline ("Ranked #1 World Class Law Firm")
+    -   Video Popup Button (Fancybox)
+    -   Image Banner
+3.  **Recognition**:
+    -   "Recognition" Badge
+    -   Text describing awards.
+4.  **Awards/Ratings Carousel**:
+    -   Owl Carousel displaying awards (Lead Counsel, Avvo, NJSBA) with star ratings.
+5.  **About Us**:
+    -   "Who are we" text.
+    -   Checklist/Values ("No Fees Unless We Win").
+    -   Team/Office images collage.
+6.  **Services (What we offer)**:
+    -   List of services with icons (Proven Track Record, No Fees, Multilingual, 24/7, Experience, Trial Attorneys, Personal Injury).
+7.  **Practice Areas**:
+    -   "Practice areas" Badge
+    -   Text description.
+    -   Interactive Map/SVG (`#Layer_1`).
+    -   List of areas: Personal Injury, Criminal Defense, Civil Litigation, Family Law, Environmental Law.
+8.  **Recent Results**:
+    -   Carousel of case studies/wins ("Car accident", "False criminal charge", "Divorce case").
+    -   Hover effects with details.
+9.  **CTA (Consultancy)**:
+    -   Background image.
+    -   "Need consultancy?" text and "Call Us Now" button.
+10. **Team**:
+    -   "Our team" Badge.
+    -   Carousel of team members (Senior Attorney, Consultant, etc.) with bios and social links.
+11. **Gallery**:
+    -   "Life at raven is easy..." text.
+    -   Isotope/Packery Filterable Gallery (All, Photography, Studio, etc.) with Fancybox integration.
+12. **Career CTA**:
+    -   "Want to join our team?" text.
+13. **Footer**:
+    -   4 Columns: About links, Account links, Resources links, Newsletter Subscription.
+    -   Copyright and Credits (ThemeWagon).
+    -   Google Map integration.
+    -   Back to Top button.
 
 ## Additional Pages
-- `about.html` - About page
-- `attorneys.html` - Attorneys listing
-- `practice-areas.html` - Practice areas
-- `case.html` - Case Studies
-- `blog.html` - Blog
-- `blog-single.html` - Blog detail
-- `contact.html` - Contact
-
----
+-   `index-slider.html`
+-   `index-video.html`
+-   `contact.html`
+-   `about.html`
+-   `team.html`
+-   `gallery.html`
+-   `components/*.html` (Various component demos)
+-   `documentation/*.html`
 
 ## Key Features
-- Text rotator animation on hero
-- Flip card hover effect for attorneys
-- AOS scroll animations
-- Owl Carousel for cases/testimonials
-- Video popup integration (Vimeo)
-- Tab navigation for About section
-- Counter-up for years of experience
+-   **Owl Carousel**: For Testimonials, Awards, Team, Recent Results.
+-   **Fancybox**: For video popups and image gallery lightboxes.
+-   **Isotope / Packery**: For the masonry gallery layout.
+-   **Google Maps API**: Integrated in the footer.
+-   **Sticky Navigation**: `sticky-top`, `sticky-kit`.
+-   **Semantic UI**: Accordion and Transition libraries included.
+-   **Animations**: Start-up animations, hover effects (`hover-scal`, `media-player-hover`).

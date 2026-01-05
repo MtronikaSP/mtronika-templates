@@ -1,36 +1,33 @@
-# Consulting template_b_v1
+# Consulting Template (Insurance/Corporate)
 
-## Template Style: Ensurance - Insurance Landing Page
-- **Framework**: Bootstrap 5
+## Template Style: Corporate / Insurance
+- **Framework**: Bootstrap 5.0.0-beta1
 - **Typography**: Raleway (Google Fonts)
-- **Theme**: Dark blue gradient background with light text
+- **Theme**: Primary Cyan/Teal (`#5EDCD4`), Secondary Blue (`#186BE8`), Clean White backgrounds.
+- **Icons**: FontAwesome 5
 
 ---
 
 ## Sections
-
-- **Navbar**: Fixed navigation + Phone number + Logo ("ensurance") + Navigation links + Search + User icon
-- **Hero Section**: ID `#top` (Full-height + Background illustration + Headline + Subtext + "Get a Quote" form card with floating labels)
-- **Products/Services**: ID `#products` (Vertical icon tabs: Car, Home, Pet, Travel Insurance + Image + Description + CTA)
-- **Best Services**: 4-column icon features (24x7 Support, Easy Claim System, Easy Installments, Strongly Secured)
-- **Testimonials/Clients**: Bootstrap carousel with client reviews + circular images
-- **News/Blog**: ID `#news` (3-column blog cards with date badges + category pills)
-- **Partners**: Logo row section
-- **Contact**: ID `#contact` (Logo + Address + Email + Phone + Newsletter subscription form)
-- **Footer Links**: Quick links row (Home, About Us, Blog, Services, Terms)
-- **Footer Copyright**: Dark bg with credits + social icons
+- **Navbar**: Sticky top navigation with "Call Us Now" CTA and mobile toggler.
+- **Hero Section**: Background illustration, main value proposition text, and a prominent floating "Get a Quote" form card.
+- **Insurance Products (Tabs)**: Interactivetabs for different services (Car, Home, Pet, Travel) displaying details and icons.
+- **Best Services**: 4-column feature grid (Support, Claims, Installments, Security).
+- **Testimonials**: Carousel slider showcasing client feedback with circular branding.
+- **Recent News**: 3-column blog layout with date and category badges.
+- **Partners**: Horizontal list of partner logos.
+- **Contact & Footer**: Contact details (Address, Phone, Email), Newsletter subscription, and copyright bar.
 
 ---
 
 ## Additional Pages
-- Single-page landing template (no additional pages)
+- `index.html` (Single Page Layout)
 
 ---
 
 ## Key Features
-- Gulp-based build system (src/public folders)
-- Floating label form inputs
-- Vertical tab navigation for products
-- Bootstrap carousel testimonials
-- Rounded pill buttons
-- Dark gradient theme with illustrations
+- **Dynamic Navbar**: Changes background/opacity on scroll.
+- **Service Tabs**: Interactive switching between service content.
+- **Testimonial Carousel**: Bootstrap-based slider.
+- **Quote Form**: Hero-placed lead generation form.
+- **Embedded CSS**: Large block of custom styles and utilities (over 20k lines in `index.html`).

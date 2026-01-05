@@ -3,38 +3,546 @@
 
 <head>
     <meta charset="utf-8">
-    <title>Kider - Preschool Website Template</title>
+    <title>Mtronika - Education Solutions</title>
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <meta content="" name="keywords">
     <meta content="" name="description">
 
     <!-- Favicon -->
-    <link href="img/favicon.ico" rel="icon">
+    <!-- <link href="img/favicon.ico" rel="icon"> -->
 
     <!-- Google Web Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600&family=Inter:wght@600&family=Lobster+Two:wght@700&display=swap" rel="stylesheet">
-    
+    <link
+        href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600&family=Inter:wght@600&family=Lobster+Two:wght@700&display=swap"
+        rel="stylesheet">
+
     <!-- Icon Font Stylesheet -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
 
     <!-- Libraries Stylesheet -->
-    <link href="lib/animate/animate.min.css" rel="stylesheet">
-    <link href="lib/owlcarousel/assets/owl.carousel.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.carousel.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.theme.default.min.css"
+        rel="stylesheet">
 
     <!-- Customized Bootstrap Stylesheet -->
-    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
-    <!-- Template Stylesheet -->
-    <link href="css/style.css" rel="stylesheet">
+    <style>
+        /********** Template CSS **********/
+        :root {
+            --primary: #FE5D37;
+            --light: #FFF5F3;
+            --dark: #103741;
+        }
+
+        .back-to-top {
+            position: fixed;
+            display: none;
+            right: 45px;
+            bottom: 45px;
+            z-index: 99;
+        }
+
+
+        /*** Spinner ***/
+        #spinner {
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity .5s ease-out, visibility 0s linear .5s;
+            z-index: 99999;
+        }
+
+        #spinner.show {
+            transition: opacity .5s ease-out, visibility 0s linear 0s;
+            visibility: visible;
+            opacity: 1;
+        }
+
+
+        /*** Button ***/
+        .btn {
+            font-weight: 500;
+            transition: .5s;
+        }
+
+        .btn.btn-primary {
+            color: #FFFFFF;
+        }
+
+        .btn-square {
+            width: 38px;
+            height: 38px;
+        }
+
+        .btn-sm-square {
+            width: 32px;
+            height: 32px;
+        }
+
+        .btn-lg-square {
+            width: 48px;
+            height: 48px;
+        }
+
+        .btn-square,
+        .btn-sm-square,
+        .btn-lg-square {
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: normal;
+            border-radius: 50px;
+        }
+
+
+        /*** Heading ***/
+        h1,
+        h2,
+        h3,
+        h4,
+        .h1,
+        .h2,
+        .h3,
+        .h4,
+        .display-1,
+        .display-2,
+        .display-3,
+        .display-4,
+        .display-5,
+        .display-6 {
+            font-family: 'Lobster Two', cursive;
+            font-weight: 700;
+        }
+
+        h5,
+        h6,
+        .h5,
+        .h6 {
+            font-weight: 600;
+        }
+
+        .font-secondary {
+            font-family: 'Lobster Two', cursive;
+        }
+
+
+        /*** Navbar ***/
+        .navbar .navbar-nav .nav-link {
+            padding: 30px 15px;
+            color: var(--dark);
+            font-weight: 500;
+            outline: none;
+        }
+
+        .navbar .navbar-nav .nav-link:hover,
+        .navbar .navbar-nav .nav-link.active {
+            color: var(--primary);
+        }
+
+        .navbar.sticky-top {
+            top: -100px;
+            transition: .5s;
+        }
+
+        .navbar .dropdown-toggle::after {
+            border: none;
+            content: "\f107";
+            font-family: "Font Awesome 5 Free";
+            font-weight: 900;
+            vertical-align: middle;
+            margin-left: 5px;
+            transition: .5s;
+        }
+
+        .navbar .dropdown-toggle[aria-expanded=true]::after {
+            transform: rotate(-180deg);
+        }
+
+        @media (max-width: 991.98px) {
+            .navbar .navbar-nav .nav-link {
+                margin-right: 0;
+                padding: 10px 0;
+            }
+
+            .navbar .navbar-nav {
+                margin-top: 15px;
+                border-top: 1px solid #EEEEEE;
+            }
+        }
+
+        @media (min-width: 992px) {
+            .navbar .nav-item .dropdown-menu {
+                display: block;
+                top: calc(100% - 15px);
+                margin-top: 0;
+                opacity: 0;
+                visibility: hidden;
+                transition: .5s;
+
+            }
+
+            .navbar .nav-item:hover .dropdown-menu {
+                top: 100%;
+                visibility: visible;
+                transition: .5s;
+                opacity: 1;
+            }
+        }
+
+
+        /*** Header ***/
+        .header-carousel::before,
+        .header-carousel::after,
+        .page-header::before,
+        .page-header::after {
+            position: absolute;
+            content: "";
+            width: 100%;
+            height: 10px;
+            top: 0;
+            left: 0;
+            background: url(img/bg-header-top.png) center center repeat-x;
+            z-index: 1;
+        }
+
+        .header-carousel::after,
+        .page-header::after {
+            height: 19px;
+            top: auto;
+            bottom: 0;
+            background: url(img/bg-header-bottom.png) center center repeat-x;
+        }
+
+        @media (max-width: 768px) {
+            .header-carousel .owl-carousel-item {
+                position: relative;
+                min-height: 500px;
+            }
+
+            .header-carousel .owl-carousel-item img {
+                position: absolute;
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            }
+
+            .header-carousel .owl-carousel-item p {
+                font-size: 16px !important;
+                font-weight: 400 !important;
+            }
+
+            .header-carousel .owl-carousel-item h1 {
+                font-size: 30px;
+                font-weight: 600;
+            }
+        }
+
+        .header-carousel .owl-nav {
+            position: absolute;
+            top: 50%;
+            right: 8%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header-carousel .owl-nav .owl-prev,
+        .header-carousel .owl-nav .owl-next {
+            margin: 7px 0;
+            width: 45px;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #FFFFFF;
+            background: transparent;
+            border: 1px solid #FFFFFF;
+            border-radius: 45px;
+            font-size: 22px;
+            transition: .5s;
+        }
+
+        .header-carousel .owl-nav .owl-prev:hover,
+        .header-carousel .owl-nav .owl-next:hover {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .page-header {
+            background: linear-gradient(rgba(0, 0, 0, .2), rgba(0, 0, 0, .2)), url(img/carousel-1.jpg) center center no-repeat;
+            background-size: cover;
+        }
+
+        .breadcrumb-item+.breadcrumb-item::before {
+            color: rgba(255, 255, 255, .5);
+        }
+
+
+        /*** Facility ***/
+        .facility-item .facility-icon {
+            position: relative;
+            margin: 0 auto;
+            width: 100px;
+            height: 100px;
+            border-radius: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .facility-item .facility-icon::before {
+            position: absolute;
+            content: "";
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            background: rgba(255, 255, 255, .9);
+            transition: .5s;
+            z-index: 1;
+        }
+
+        .facility-item .facility-icon span {
+            position: absolute;
+            content: "";
+            width: 15px;
+            height: 30px;
+            top: 0;
+            left: 0;
+            border-radius: 50%;
+        }
+
+        .facility-item .facility-icon span:last-child {
+            left: auto;
+            right: 0;
+        }
+
+        .facility-item .facility-icon i {
+            position: relative;
+            z-index: 2;
+        }
+
+        .facility-item .facility-text {
+            position: relative;
+            min-height: 250px;
+            padding: 30px;
+            border-radius: 100%;
+            display: flex;
+            text-align: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+
+        .facility-item .facility-text::before {
+            position: absolute;
+            content: "";
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            background: rgba(255, 255, 255, .9);
+            transition: .5s;
+            z-index: 1;
+        }
+
+        .facility-item .facility-text * {
+            position: relative;
+            z-index: 2;
+        }
+
+        .facility-item:hover .facility-icon::before,
+        .facility-item:hover .facility-text::before {
+            background: transparent;
+        }
+
+        .facility-item * {
+            transition: .5s;
+        }
+
+        .facility-item:hover * {
+            color: #FFFFFF !important;
+        }
+
+
+        /*** About ***/
+        .about-img img {
+            transition: .5s;
+        }
+
+        .about-img img:hover {
+            background: var(--primary) !important;
+        }
+
+
+        /*** Classes ***/
+        .classes-item {
+            transition: .5s;
+        }
+
+        .classes-item:hover {
+            margin-top: -10px;
+        }
+
+
+        /*** Team ***/
+        .team-item .team-text {
+            position: absolute;
+            width: 250px;
+            height: 250px;
+            bottom: 0;
+            right: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            background: #FFFFFF;
+            border: 17px solid var(--light);
+            border-radius: 250px;
+            transition: .5s;
+        }
+
+        .team-item:hover .team-text {
+            border-color: var(--primary);
+        }
+
+
+        /*** Testimonial ***/
+        .testimonial-carousel {
+            padding-left: 1.5rem;
+            padding-right: 1.5rem;
+        }
+
+        @media (min-width: 576px) {
+            .testimonial-carousel {
+                padding-left: 4rem;
+                padding-right: 4rem;
+            }
+        }
+
+        .testimonial-carousel .testimonial-item .border {
+            border: 1px dashed rgba(0, 185, 142, .3) !important;
+        }
+
+        .testimonial-carousel .owl-nav {
+            position: absolute;
+            width: 100%;
+            height: 45px;
+            top: 50%;
+            left: 0;
+            transform: translateY(-50%);
+            display: flex;
+            justify-content: space-between;
+            z-index: 1;
+        }
+
+        .testimonial-carousel .owl-nav .owl-prev,
+        .testimonial-carousel .owl-nav .owl-next {
+            position: relative;
+            width: 45px;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #FFFFFF;
+            background: var(--primary);
+            border-radius: 45px;
+            font-size: 20px;
+            transition: .5s;
+        }
+
+        .testimonial-carousel .owl-nav .owl-prev:hover,
+        .testimonial-carousel .owl-nav .owl-next:hover {
+            background: var(--dark);
+        }
+
+
+        /*** Footer ***/
+        .footer .btn.btn-social {
+            margin-right: 5px;
+            width: 45px;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #FFFFFF;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: 45px;
+            transition: .3s;
+        }
+
+        .footer .btn.btn-social:hover {
+            border-color: var(--primary);
+            background: var(--primary);
+        }
+
+        .footer .btn.btn-link {
+            display: block;
+            margin-bottom: 5px;
+            padding: 0;
+            text-align: left;
+            font-size: 16px;
+            font-weight: normal;
+            text-transform: capitalize;
+            transition: .3s;
+        }
+
+        .footer .btn.btn-link::before {
+            position: relative;
+            content: "\f105";
+            font-family: "Font Awesome 5 Free";
+            font-weight: 900;
+            margin-right: 10px;
+        }
+
+        .footer .btn.btn-link:hover {
+            color: var(--primary) !important;
+            letter-spacing: 1px;
+            box-shadow: none;
+        }
+
+        .footer .form-control {
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        .footer .copyright {
+            padding: 25px 0;
+            font-size: 15px;
+            border-top: 1px solid rgba(256, 256, 256, .1);
+        }
+
+        .footer .copyright a {
+            color: #FFFFFF;
+        }
+
+        .footer .footer-menu a {
+            margin-right: 15px;
+            padding-right: 15px;
+            border-right: 1px solid rgba(255, 255, 255, .1);
+        }
+
+        .footer .copyright a:hover,
+        .footer .footer-menu a:hover {
+            color: var(--primary) !important;
+        }
+
+        .footer .footer-menu a:last-child {
+            margin-right: 0;
+            padding-right: 0;
+            border-right: none;
+        }
+    </style>
 </head>
 
 <body>
     <div class="container-xxl bg-white p-0">
         <!-- Spinner Start -->
-        <div id="spinner" class="show bg-white position-fixed translate-middle w-100 vh-100 top-50 start-50 d-flex align-items-center justify-content-center">
+        <div id="spinner"
+            class="show bg-white position-fixed translate-middle w-100 vh-100 top-50 start-50 d-flex align-items-center justify-content-center">
             <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
                 <span class="sr-only">Loading...</span>
             </div>
@@ -45,30 +553,30 @@
         <!-- Navbar Start -->
         <nav class="navbar navbar-expand-lg bg-white navbar-light sticky-top px-4 px-lg-5 py-lg-0">
             <a href="index.html" class="navbar-brand">
-                <h1 class="m-0 text-primary"><i class="fa fa-book-reader me-3"></i>Kider</h1>
+                <h1 class="m-0 text-primary"><i class="fa fa-book-reader me-3"></i>Mtronika</h1>
             </a>
             <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarCollapse">
                 <div class="navbar-nav mx-auto">
-                    <a href="index.html" class="nav-item nav-link active">Home</a>
-                    <a href="about.html" class="nav-item nav-link">About Us</a>
-                    <a href="classes.html" class="nav-item nav-link">Classes</a>
+                    <a href="#top" class="nav-item nav-link active">Home</a>
+                    <a href="#about" class="nav-item nav-link">About Us</a>
+                    <a href="#classes" class="nav-item nav-link">Classes</a>
                     <div class="nav-item dropdown">
                         <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">Pages</a>
                         <div class="dropdown-menu rounded-0 rounded-bottom border-0 shadow-sm m-0">
-                            <a href="facility.html" class="dropdown-item">School Facilities</a>
-                            <a href="team.html" class="dropdown-item">Popular Teachers</a>
-                            <a href="call-to-action.html" class="dropdown-item">Become A Teachers</a>
-                            <a href="appointment.html" class="dropdown-item">Make Appointment</a>
-                            <a href="testimonial.html" class="dropdown-item">Testimonial</a>
-                            <a href="404.html" class="dropdown-item">404 Error</a>
+                            <a href="#facilities" class="dropdown-item">School Facilities</a>
+                            <a href="#team" class="dropdown-item">Popular Teachers</a>
+                            <a href="#call-to-action" class="dropdown-item">Become A Teachers</a>
+                            <a href="#appointment" class="dropdown-item">Make Appointment</a>
+                            <a href="#testimonial" class="dropdown-item">Testimonial</a>
                         </div>
                     </div>
-                    <a href="contact.html" class="nav-item nav-link">Contact Us</a>
+                    <a href="#contact" class="nav-item nav-link">Contact Us</a>
                 </div>
-                <a href="" class="btn btn-primary rounded-pill px-3 d-none d-lg-block">Join Us<i class="fa fa-arrow-right ms-3"></i></a>
+                <a href="" class="btn btn-primary rounded-pill px-3 d-none d-lg-block">Join Us<i
+                        class="fa fa-arrow-right ms-3"></i></a>
             </div>
         </nav>
         <!-- Navbar End -->
@@ -79,14 +587,21 @@
             <div class="owl-carousel header-carousel position-relative">
                 <div class="owl-carousel-item position-relative">
                     <img class="img-fluid" src="img/carousel-1.jpg" alt="">
-                    <div class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center" style="background: rgba(0, 0, 0, .2);">
+                    <div class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center"
+                        style="background: rgba(0, 0, 0, .2);">
                         <div class="container">
                             <div class="row justify-content-start">
                                 <div class="col-10 col-lg-8">
-                                    <h1 class="display-2 text-white animated slideInDown mb-4">The Best Kindergarten School For Your Child</h1>
-                                    <p class="fs-5 fw-medium text-white mb-4 pb-2">Vero elitr justo clita lorem. Ipsum dolor at sed stet sit diam no. Kasd rebum ipsum et diam justo clita et kasd rebum sea elitr.</p>
-                                    <a href="" class="btn btn-primary rounded-pill py-sm-3 px-sm-5 me-3 animated slideInLeft">Learn More</a>
-                                    <a href="" class="btn btn-dark rounded-pill py-sm-3 px-sm-5 animated slideInRight">Our Classes</a>
+                                    <h1 class="display-2 text-white animated slideInDown mb-4">The Best Education For
+                                        Your Child</h1>
+                                    <p class="fs-5 fw-medium text-white mb-4 pb-2">We provide a nurturing environment
+                                        where children can learn and grow. Join us for a brighter future.</p>
+                                    <a href=""
+                                        class="btn btn-primary rounded-pill py-sm-3 px-sm-5 me-3 animated slideInLeft">Learn
+                                        More</a>
+                                    <a href=""
+                                        class="btn btn-dark rounded-pill py-sm-3 px-sm-5 animated slideInRight">Our
+                                        Classes</a>
                                 </div>
                             </div>
                         </div>
@@ -94,14 +609,21 @@
                 </div>
                 <div class="owl-carousel-item position-relative">
                     <img class="img-fluid" src="img/carousel-2.jpg" alt="">
-                    <div class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center" style="background: rgba(0, 0, 0, .2);">
+                    <div class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center"
+                        style="background: rgba(0, 0, 0, .2);">
                         <div class="container">
                             <div class="row justify-content-start">
                                 <div class="col-10 col-lg-8">
-                                    <h1 class="display-2 text-white animated slideInDown mb-4">Make A Brighter Future For Your Child</h1>
-                                    <p class="fs-5 fw-medium text-white mb-4 pb-2">Vero elitr justo clita lorem. Ipsum dolor at sed stet sit diam no. Kasd rebum ipsum et diam justo clita et kasd rebum sea elitr.</p>
-                                    <a href="" class="btn btn-primary rounded-pill py-sm-3 px-sm-5 me-3 animated slideInLeft">Learn More</a>
-                                    <a href="" class="btn btn-dark rounded-pill py-sm-3 px-sm-5 animated slideInRight">Our Classes</a>
+                                    <h1 class="display-2 text-white animated slideInDown mb-4">Make A Brighter Future
+                                        For Your Child</h1>
+                                    <p class="fs-5 fw-medium text-white mb-4 pb-2">Our dedicated teachers and modern
+                                        facilities ensure the best learning experience for your child.</p>
+                                    <a href=""
+                                        class="btn btn-primary rounded-pill py-sm-3 px-sm-5 me-3 animated slideInLeft">Learn
+                                        More</a>
+                                    <a href=""
+                                        class="btn btn-dark rounded-pill py-sm-3 px-sm-5 animated slideInRight">Our
+                                        Classes</a>
                                 </div>
                             </div>
                         </div>
@@ -113,11 +635,11 @@
 
 
         <!-- Facilities Start -->
-        <div class="container-xxl py-5">
+        <div class="container-xxl py-5" id="facilities">
             <div class="container">
                 <div class="text-center mx-auto mb-5 wow fadeInUp" data-wow-delay="0.1s" style="max-width: 600px;">
                     <h1 class="mb-3">School Facilities</h1>
-                    <p>Eirmod sed ipsum dolor sit rebum labore magna erat. Tempor ut dolore lorem kasd vero ipsum sit eirmod sit. Ipsum diam justo sed rebum vero dolor duo.</p>
+                    <p>We offer state-of-the-art facilities to support your child's education and well-being.</p>
                 </div>
                 <div class="row g-4">
                     <div class="col-lg-3 col-sm-6 wow fadeInUp" data-wow-delay="0.1s">
@@ -129,7 +651,7 @@
                             </div>
                             <div class="facility-text bg-primary">
                                 <h3 class="text-primary mb-3">School Bus</h3>
-                                <p class="mb-0">Eirmod sed ipsum dolor sit rebum magna erat lorem kasd vero ipsum sit</p>
+                                <p class="mb-0">Safe and reliable transportation for all students.</p>
                             </div>
                         </div>
                     </div>
@@ -142,7 +664,7 @@
                             </div>
                             <div class="facility-text bg-success">
                                 <h3 class="text-success mb-3">Playground</h3>
-                                <p class="mb-0">Eirmod sed ipsum dolor sit rebum magna erat lorem kasd vero ipsum sit</p>
+                                <p class="mb-0">Large and safe playground for recreational activities.</p>
                             </div>
                         </div>
                     </div>
@@ -155,7 +677,7 @@
                             </div>
                             <div class="facility-text bg-warning">
                                 <h3 class="text-warning mb-3">Healthy Canteen</h3>
-                                <p class="mb-0">Eirmod sed ipsum dolor sit rebum magna erat lorem kasd vero ipsum sit</p>
+                                <p class="mb-0">Nutritious meals and snacks provided daily.</p>
                             </div>
                         </div>
                     </div>
@@ -168,7 +690,7 @@
                             </div>
                             <div class="facility-text bg-info">
                                 <h3 class="text-info mb-3">Positive Learning</h3>
-                                <p class="mb-0">Eirmod sed ipsum dolor sit rebum magna erat lorem kasd vero ipsum sit</p>
+                                <p class="mb-0">A conducive environment for effective learning and growth.</p>
                             </div>
                         </div>
                     </div>
@@ -179,20 +701,23 @@
 
 
         <!-- About Start -->
-        <div class="container-xxl py-5">
+        <div class="container-xxl py-5" id="about">
             <div class="container">
                 <div class="row g-5 align-items-center">
                     <div class="col-lg-6 wow fadeInUp" data-wow-delay="0.1s">
                         <h1 class="mb-4">Learn More About Our Work And Our Cultural Activities</h1>
-                        <p>Tempor erat elitr rebum at clita. Diam dolor diam ipsum sit. Aliqu diam amet diam et eos. Clita erat ipsum et lorem et sit, sed stet lorem sit clita duo justo magna dolore erat amet</p>
-                        <p class="mb-4">Stet no et lorem dolor et diam, amet duo ut dolore vero eos. No stet est diam rebum amet diam ipsum. Clita clita labore, dolor duo nonumy clita sit at, sed sit sanctus dolor eos, ipsum labore duo duo sit no sea diam. Et dolor et kasd ea. Eirmod diam at dolor est vero nonumy magna.</p>
+                        <p>We believe in a holistic approach to education, integrating cultural activities with academic
+                            learning.</p>
+                        <p class="mb-4">Our curriculum is designed to foster creativity, critical thinking, and social
+                            skills. We celebrate diversity and encourage students to explore different cultures.</p>
                         <div class="row g-4 align-items-center">
                             <div class="col-sm-6">
                                 <a class="btn btn-primary rounded-pill py-3 px-5" href="">Read More</a>
                             </div>
                             <div class="col-sm-6">
                                 <div class="d-flex align-items-center">
-                                    <img class="rounded-circle flex-shrink-0" src="img/user.jpg" alt="" style="width: 45px; height: 45px;">
+                                    <img class="rounded-circle flex-shrink-0" src="img/user.jpg" alt=""
+                                        style="width: 45px; height: 45px;">
                                     <div class="ms-3">
                                         <h6 class="text-primary mb-1">Jhon Doe</h6>
                                         <small>CEO & Founder</small>
@@ -221,22 +746,23 @@
 
 
         <!-- Call To Action Start -->
-        <div class="container-xxl py-5">
+        <div class="container-xxl py-5" id="call-to-action">
             <div class="container">
                 <div class="bg-light rounded">
                     <div class="row g-0">
                         <div class="col-lg-6 wow fadeIn" data-wow-delay="0.1s" style="min-height: 400px;">
                             <div class="position-relative h-100">
-                                <img class="position-absolute w-100 h-100 rounded" src="img/call-to-action.jpg" style="object-fit: cover;">
+                                <img class="position-absolute w-100 h-100 rounded" src="img/call-to-action.jpg"
+                                    style="object-fit: cover;">
                             </div>
                         </div>
                         <div class="col-lg-6 wow fadeIn" data-wow-delay="0.5s">
                             <div class="h-100 d-flex flex-column justify-content-center p-5">
                                 <h1 class="mb-4">Become A Teacher</h1>
-                                <p class="mb-4">Tempor erat elitr rebum at clita. Diam dolor diam ipsum sit. Aliqu diam amet diam et eos.
-                                    Clita erat ipsum et lorem et sit, sed stet lorem sit clita duo justo magna dolore erat amet
-                                </p>
-                                <a class="btn btn-primary py-3 px-5" href="">Get Started Now<i class="fa fa-arrow-right ms-2"></i></a>
+                                <p class="mb-4">Join our team of dedicated educators and make a difference in the lives
+                                    of children. We offer a supportive and inspiring work environment.</p>
+                                <a class="btn btn-primary py-3 px-5" href="">Get Started Now<i
+                                        class="fa fa-arrow-right ms-2"></i></a>
                             </div>
                         </div>
                     </div>
@@ -247,11 +773,11 @@
 
 
         <!-- Classes Start -->
-        <div class="container-xxl py-5">
+        <div class="container-xxl py-5" id="classes">
             <div class="container">
                 <div class="text-center mx-auto mb-5 wow fadeInUp" data-wow-delay="0.1s" style="max-width: 600px;">
                     <h1 class="mb-3">School Classes</h1>
-                    <p>Eirmod sed ipsum dolor sit rebum labore magna erat. Tempor ut dolore lorem kasd vero ipsum sit eirmod sit. Ipsum diam justo sed rebum vero dolor duo.</p>
+                    <p>We offer a variety of classes tailored to different age groups and interests.</p>
                 </div>
                 <div class="row g-4">
                     <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.1s">
@@ -263,7 +789,8 @@
                                 <a class="d-block text-center h3 mt-3 mb-4" href="">Art & Drawing</a>
                                 <div class="d-flex align-items-center justify-content-between mb-4">
                                     <div class="d-flex align-items-center">
-                                        <img class="rounded-circle flex-shrink-0" src="img/user.jpg" alt="" style="width: 45px; height: 45px;">
+                                        <img class="rounded-circle flex-shrink-0" src="img/user.jpg" alt=""
+                                            style="width: 45px; height: 45px;">
                                         <div class="ms-3">
                                             <h6 class="text-primary mb-1">Jhon Doe</h6>
                                             <small>Teacher</small>
@@ -303,7 +830,8 @@
                                 <a class="d-block text-center h3 mt-3 mb-4" href="">Color Management</a>
                                 <div class="d-flex align-items-center justify-content-between mb-4">
                                     <div class="d-flex align-items-center">
-                                        <img class="rounded-circle flex-shrink-0" src="img/user.jpg" alt="" style="width: 45px; height: 45px;">
+                                        <img class="rounded-circle flex-shrink-0" src="img/user.jpg" alt=""
+                                            style="width: 45px; height: 45px;">
                                         <div class="ms-3">
                                             <h6 class="text-primary mb-1">Jhon Doe</h6>
                                             <small>Teacher</small>
@@ -343,7 +871,8 @@
                                 <a class="d-block text-center h3 mt-3 mb-4" href="">Athletic & Dance</a>
                                 <div class="d-flex align-items-center justify-content-between mb-4">
                                     <div class="d-flex align-items-center">
-                                        <img class="rounded-circle flex-shrink-0" src="img/user.jpg" alt="" style="width: 45px; height: 45px;">
+                                        <img class="rounded-circle flex-shrink-0" src="img/user.jpg" alt=""
+                                            style="width: 45px; height: 45px;">
                                         <div class="ms-3">
                                             <h6 class="text-primary mb-1">Jhon Doe</h6>
                                             <small>Teacher</small>
@@ -383,7 +912,8 @@
                                 <a class="d-block text-center h3 mt-3 mb-4" href="">Language & Speaking</a>
                                 <div class="d-flex align-items-center justify-content-between mb-4">
                                     <div class="d-flex align-items-center">
-                                        <img class="rounded-circle flex-shrink-0" src="img/user.jpg" alt="" style="width: 45px; height: 45px;">
+                                        <img class="rounded-circle flex-shrink-0" src="img/user.jpg" alt=""
+                                            style="width: 45px; height: 45px;">
                                         <div class="ms-3">
                                             <h6 class="text-primary mb-1">Jhon Doe</h6>
                                             <small>Teacher</small>
@@ -423,7 +953,8 @@
                                 <a class="d-block text-center h3 mt-3 mb-4" href="">Religion & History</a>
                                 <div class="d-flex align-items-center justify-content-between mb-4">
                                     <div class="d-flex align-items-center">
-                                        <img class="rounded-circle flex-shrink-0" src="img/user.jpg" alt="" style="width: 45px; height: 45px;">
+                                        <img class="rounded-circle flex-shrink-0" src="img/user.jpg" alt=""
+                                            style="width: 45px; height: 45px;">
                                         <div class="ms-3">
                                             <h6 class="text-primary mb-1">Jhon Doe</h6>
                                             <small>Teacher</small>
@@ -463,7 +994,8 @@
                                 <a class="d-block text-center h3 mt-3 mb-4" href="">General Knowledge</a>
                                 <div class="d-flex align-items-center justify-content-between mb-4">
                                     <div class="d-flex align-items-center">
-                                        <img class="rounded-circle flex-shrink-0" src="img/user.jpg" alt="" style="width: 45px; height: 45px;">
+                                        <img class="rounded-circle flex-shrink-0" src="img/user.jpg" alt=""
+                                            style="width: 45px; height: 45px;">
                                         <div class="ms-3">
                                             <h6 class="text-primary mb-1">Jhon Doe</h6>
                                             <small>Teacher</small>
@@ -501,7 +1033,7 @@
 
 
         <!-- Appointment Start -->
-        <div class="container-xxl py-5">
+        <div class="container-xxl py-5" id="appointment">
             <div class="container">
                 <div class="bg-light rounded">
                     <div class="row g-0">
@@ -512,31 +1044,37 @@
                                     <div class="row g-3">
                                         <div class="col-sm-6">
                                             <div class="form-floating">
-                                                <input type="text" class="form-control border-0" id="gname" placeholder="Gurdian Name">
+                                                <input type="text" class="form-control border-0" id="gname"
+                                                    placeholder="Gurdian Name">
                                                 <label for="gname">Gurdian Name</label>
                                             </div>
                                         </div>
                                         <div class="col-sm-6">
                                             <div class="form-floating">
-                                                <input type="email" class="form-control border-0" id="gmail" placeholder="Gurdian Email">
+                                                <input type="email" class="form-control border-0" id="gmail"
+                                                    placeholder="Gurdian Email">
                                                 <label for="gmail">Gurdian Email</label>
                                             </div>
                                         </div>
                                         <div class="col-sm-6">
                                             <div class="form-floating">
-                                                <input type="text" class="form-control border-0" id="cname" placeholder="Child Name">
+                                                <input type="text" class="form-control border-0" id="cname"
+                                                    placeholder="Child Name">
                                                 <label for="cname">Child Name</label>
                                             </div>
                                         </div>
                                         <div class="col-sm-6">
                                             <div class="form-floating">
-                                                <input type="text" class="form-control border-0" id="cage" placeholder="Child Age">
+                                                <input type="text" class="form-control border-0" id="cage"
+                                                    placeholder="Child Age">
                                                 <label for="cage">Child Age</label>
                                             </div>
                                         </div>
                                         <div class="col-12">
                                             <div class="form-floating">
-                                                <textarea class="form-control border-0" placeholder="Leave a message here" id="message" style="height: 100px"></textarea>
+                                                <textarea class="form-control border-0"
+                                                    placeholder="Leave a message here" id="message"
+                                                    style="height: 100px"></textarea>
                                                 <label for="message">Message</label>
                                             </div>
                                         </div>
@@ -549,7 +1087,8 @@
                         </div>
                         <div class="col-lg-6 wow fadeIn" data-wow-delay="0.5s" style="min-height: 400px;">
                             <div class="position-relative h-100">
-                                <img class="position-absolute w-100 h-100 rounded" src="img/appointment.jpg" style="object-fit: cover;">
+                                <img class="position-absolute w-100 h-100 rounded" src="img/appointment.jpg"
+                                    style="object-fit: cover;">
                             </div>
                         </div>
                     </div>
@@ -560,12 +1099,11 @@
 
 
         <!-- Team Start -->
-        <div class="container-xxl py-5">
+        <div class="container-xxl py-5" id="team">
             <div class="container">
                 <div class="text-center mx-auto mb-5 wow fadeInUp" data-wow-delay="0.1s" style="max-width: 600px;">
                     <h1 class="mb-3">Popular Teachers</h1>
-                    <p>Eirmod sed ipsum dolor sit rebum labore magna erat. Tempor ut dolore lorem kasd vero ipsum sit
-                        eirmod sit. Ipsum diam justo sed rebum vero dolor duo.</p>
+                    <p>Our teachers are experienced, certified, and dedicated to child development.</p>
                 </div>
                 <div class="row g-4">
                     <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.1s">
@@ -575,9 +1113,12 @@
                                 <h3>Full Name</h3>
                                 <p>Designation</p>
                                 <div class="d-flex align-items-center">
-                                    <a class="btn btn-square btn-primary mx-1" href=""><i class="fab fa-facebook-f"></i></a>
-                                    <a class="btn btn-square btn-primary  mx-1" href=""><i class="fab fa-twitter"></i></a>
-                                    <a class="btn btn-square btn-primary  mx-1" href=""><i class="fab fa-instagram"></i></a>
+                                    <a class="btn btn-square btn-primary mx-1" href=""><i
+                                            class="fab fa-facebook-f"></i></a>
+                                    <a class="btn btn-square btn-primary  mx-1" href=""><i
+                                            class="fab fa-twitter"></i></a>
+                                    <a class="btn btn-square btn-primary  mx-1" href=""><i
+                                            class="fab fa-instagram"></i></a>
                                 </div>
                             </div>
                         </div>
@@ -589,9 +1130,12 @@
                                 <h3>Full Name</h3>
                                 <p>Designation</p>
                                 <div class="d-flex align-items-center">
-                                    <a class="btn btn-square btn-primary mx-1" href=""><i class="fab fa-facebook-f"></i></a>
-                                    <a class="btn btn-square btn-primary  mx-1" href=""><i class="fab fa-twitter"></i></a>
-                                    <a class="btn btn-square btn-primary  mx-1" href=""><i class="fab fa-instagram"></i></a>
+                                    <a class="btn btn-square btn-primary mx-1" href=""><i
+                                            class="fab fa-facebook-f"></i></a>
+                                    <a class="btn btn-square btn-primary  mx-1" href=""><i
+                                            class="fab fa-twitter"></i></a>
+                                    <a class="btn btn-square btn-primary  mx-1" href=""><i
+                                            class="fab fa-instagram"></i></a>
                                 </div>
                             </div>
                         </div>
@@ -603,9 +1147,12 @@
                                 <h3>Full Name</h3>
                                 <p>Designation</p>
                                 <div class="d-flex align-items-center">
-                                    <a class="btn btn-square btn-primary mx-1" href=""><i class="fab fa-facebook-f"></i></a>
-                                    <a class="btn btn-square btn-primary  mx-1" href=""><i class="fab fa-twitter"></i></a>
-                                    <a class="btn btn-square btn-primary  mx-1" href=""><i class="fab fa-instagram"></i></a>
+                                    <a class="btn btn-square btn-primary mx-1" href=""><i
+                                            class="fab fa-facebook-f"></i></a>
+                                    <a class="btn btn-square btn-primary  mx-1" href=""><i
+                                            class="fab fa-twitter"></i></a>
+                                    <a class="btn btn-square btn-primary  mx-1" href=""><i
+                                            class="fab fa-instagram"></i></a>
                                 </div>
                             </div>
                         </div>
@@ -617,42 +1164,46 @@
 
 
         <!-- Testimonial Start -->
-        <div class="container-xxl py-5">
+        <div class="container-xxl py-5" id="testimonial">
             <div class="container">
                 <div class="text-center mx-auto mb-5 wow fadeInUp" data-wow-delay="0.1s" style="max-width: 600px;">
                     <h1 class="mb-3">Our Clients Say!</h1>
-                    <p>Eirmod sed ipsum dolor sit rebum labore magna erat. Tempor ut dolore lorem kasd vero ipsum sit eirmod sit. Ipsum diam justo sed rebum vero dolor duo.</p>
+                    <p>Hear what parents have to say about their experience with Mtronika.</p>
                 </div>
                 <div class="owl-carousel testimonial-carousel wow fadeInUp" data-wow-delay="0.1s">
                     <div class="testimonial-item bg-light rounded p-5">
-                        <p class="fs-5">Tempor stet labore dolor clita stet diam amet ipsum dolor duo ipsum rebum stet dolor amet diam stet. Est stet ea lorem amet est kasd kasd erat eos</p>
+                        <p class="fs-5">Mtronika provided an excellent learning environment for my child. Highly
+                            recommended!</p>
                         <div class="d-flex align-items-center bg-white me-n5" style="border-radius: 50px 0 0 50px;">
-                            <img class="img-fluid flex-shrink-0 rounded-circle" src="img/testimonial-1.jpg" style="width: 90px; height: 90px;">
+                            <img class="img-fluid flex-shrink-0 rounded-circle" src="img/testimonial-1.jpg"
+                                style="width: 90px; height: 90px;">
                             <div class="ps-3">
                                 <h3 class="mb-1">Client Name</h3>
-                                <span>Profession</span>
+                                <span>Parent</span>
                             </div>
                             <i class="fa fa-quote-right fa-3x text-primary ms-auto d-none d-sm-flex"></i>
                         </div>
                     </div>
                     <div class="testimonial-item bg-light rounded p-5">
-                        <p class="fs-5">Tempor stet labore dolor clita stet diam amet ipsum dolor duo ipsum rebum stet dolor amet diam stet. Est stet ea lorem amet est kasd kasd erat eos</p>
+                        <p class="fs-5">The teachers are wonderful and caring. My son loves going to school here.</p>
                         <div class="d-flex align-items-center bg-white me-n5" style="border-radius: 50px 0 0 50px;">
-                            <img class="img-fluid flex-shrink-0 rounded-circle" src="img/testimonial-2.jpg" style="width: 90px; height: 90px;">
+                            <img class="img-fluid flex-shrink-0 rounded-circle" src="img/testimonial-2.jpg"
+                                style="width: 90px; height: 90px;">
                             <div class="ps-3">
                                 <h3 class="mb-1">Client Name</h3>
-                                <span>Profession</span>
+                                <span>Parent</span>
                             </div>
                             <i class="fa fa-quote-right fa-3x text-primary ms-auto d-none d-sm-flex"></i>
                         </div>
                     </div>
                     <div class="testimonial-item bg-light rounded p-5">
-                        <p class="fs-5">Tempor stet labore dolor clita stet diam amet ipsum dolor duo ipsum rebum stet dolor amet diam stet. Est stet ea lorem amet est kasd kasd erat eos</p>
+                        <p class="fs-5">Great facilities and curriculum. We are very happy with our choice.</p>
                         <div class="d-flex align-items-center bg-white me-n5" style="border-radius: 50px 0 0 50px;">
-                            <img class="img-fluid flex-shrink-0 rounded-circle" src="img/testimonial-3.jpg" style="width: 90px; height: 90px;">
+                            <img class="img-fluid flex-shrink-0 rounded-circle" src="img/testimonial-3.jpg"
+                                style="width: 90px; height: 90px;">
                             <div class="ps-3">
                                 <h3 class="mb-1">Client Name</h3>
-                                <span>Profession</span>
+                                <span>Parent</span>
                             </div>
                             <i class="fa fa-quote-right fa-3x text-primary ms-auto d-none d-sm-flex"></i>
                         </div>
@@ -664,7 +1215,8 @@
 
 
         <!-- Footer Start -->
-        <div class="container-fluid bg-dark text-white-50 footer pt-5 mt-5 wow fadeIn" data-wow-delay="0.1s">
+        <div class="container-fluid bg-dark text-white-50 footer pt-5 mt-5 wow fadeIn" data-wow-delay="0.1s"
+            id="contact">
             <div class="container py-5">
                 <div class="row g-5">
                     <div class="col-lg-3 col-md-6">
@@ -712,10 +1264,12 @@
                     </div>
                     <div class="col-lg-3 col-md-6">
                         <h3 class="text-white mb-4">Newsletter</h3>
-                        <p>Dolor amet sit justo amet elitr clita ipsum elitr est.</p>
+                        <p>Subscribe to our newsletter for updates.</p>
                         <div class="position-relative mx-auto" style="max-width: 400px;">
-                            <input class="form-control bg-transparent w-100 py-3 ps-4 pe-5" type="text" placeholder="Your email">
-                            <button type="button" class="btn btn-primary py-2 position-absolute top-0 end-0 mt-2 me-2">SignUp</button>
+                            <input class="form-control bg-transparent w-100 py-3 ps-4 pe-5" type="text"
+                                placeholder="Your email">
+                            <button type="button"
+                                class="btn btn-primary py-2 position-absolute top-0 end-0 mt-2 me-2">SignUp</button>
                         </div>
                     </div>
                 </div>
@@ -724,11 +1278,11 @@
                 <div class="copyright">
                     <div class="row">
                         <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
-                            &copy; <a class="border-bottom" href="#">Your Site Name</a>, All Right Reserved. 
-							
-							<!--/*** This template is free as long as you keep the footer author’s credit link/attribution link/backlink. If you'd like to use the template without the footer author’s credit link/attribution link/backlink, you can purchase the Credit Removal License from "https://htmlcodex.com/credit-removal". Thank you for your support. ***/-->
-							Designed By <a class="border-bottom" href="https://mtronika.co.za">Mtronika</a>
-                            <br>Distributed By: <a class="border-bottom" href="https://mtronika.co.za" target="_blank">Mtronika</a>
+                            &copy; <a class="border-bottom" href="#">Mtronika</a>, All Right Reserved.
+
+                            Designed By <a class="border-bottom" href="https://mtronika.co.za">Mtronika</a>
+                            <br>Distributed By: <a class="border-bottom" href="https://mtronika.co.za"
+                                target="_blank">Mtronika</a>
                         </div>
                         <div class="col-md-6 text-center text-md-end">
                             <div class="footer-menu">
@@ -752,13 +1306,105 @@
     <!-- JavaScript Libraries -->
     <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="lib/wow/wow.min.js"></script>
-    <script src="lib/easing/easing.min.js"></script>
-    <script src="lib/waypoints/waypoints.min.js"></script>
-    <script src="lib/owlcarousel/owl.carousel.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/wow/1.1.2/wow.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.4.1/jquery.easing.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/waypoints/4.0.1/jquery.waypoints.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/owl.carousel.min.js"></script>
 
     <!-- Template Javascript -->
-    <script src="js/main.js"></script>
+    <script>
+        (function ($) {
+            "use strict";
+
+            // Initiate the wowjs
+            new WOW().init();
+
+
+            // Spinner
+            var spinner = function () {
+                setTimeout(function () {
+                    if ($('#spinner').length > 0) {
+                        $('#spinner').removeClass('show');
+                    }
+                }, 1);
+            };
+            spinner();
+
+
+            // Sticky Navbar
+            $(window).scroll(function () {
+                if ($(this).scrollTop() > 300) {
+                    $('.sticky-top').addClass('shadow-sm').css('top', '0px');
+                } else {
+                    $('.sticky-top').removeClass('shadow-sm').css('top', '-100px');
+                }
+            });
+
+
+            // Back to top button
+            $(window).scroll(function () {
+                if ($(this).scrollTop() > 300) {
+                    $('.back-to-top').fadeIn('slow');
+                } else {
+                    $('.back-to-top').fadeOut('slow');
+                }
+            });
+            $('.back-to-top').click(function () {
+                $('html, body').animate({ scrollTop: 0 }, 1500, 'easeInOutExpo');
+                return false;
+            });
+
+            // Smooth scrolling for internal links
+            $('a[href*="#"]').on('click', function (e) {
+                if (this.hash !== "" && this.hash !== "#") {
+                    e.preventDefault();
+                    var hash = this.hash;
+                    $('html, body').animate({
+                        scrollTop: $(hash).offset().top - 75 // Adjust for sticky navbar
+                    }, 1000, 'easeInOutExpo');
+                }
+            });
+
+
+            // Header carousel
+            $(".header-carousel").owlCarousel({
+                autoplay: true,
+                smartSpeed: 1500,
+                items: 1,
+                dots: true,
+                loop: true,
+                nav: true,
+                navText: [
+                    '<i class="bi bi-chevron-left"></i>',
+                    '<i class="bi bi-chevron-right"></i>'
+                ]
+            });
+
+
+            // Testimonials carousel
+            $(".testimonial-carousel").owlCarousel({
+                autoplay: true,
+                smartSpeed: 1000,
+                margin: 24,
+                dots: false,
+                loop: true,
+                nav: true,
+                navText: [
+                    '<i class="bi bi-arrow-left"></i>',
+                    '<i class="bi bi-arrow-right"></i>'
+                ],
+                responsive: {
+                    0: {
+                        items: 1
+                    },
+                    992: {
+                        items: 2
+                    }
+                }
+            });
+
+        })(jQuery);
+    </script>
 </body>
 
 </html>

@@ -1,554 +1,1872 @@
 <!DOCTYPE html>
 <html lang="en">
 
-  <head>
-
+<head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="">
-    <meta name="author" content="">
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:100,200,300,400,500,600,700,800,900" rel="stylesheet">
-
-    <title>EduWell - Education HTML5 Template</title>
+    <title>Mtronika - Education Solutions</title>
 
     <!-- Bootstrap core CSS -->
-    <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css" rel="stylesheet">
+    <!-- Owl Carousel -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.carousel.min.css">
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.theme.default.min.css">
+    <!-- Lightbox -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/css/lightbox.min.css">
+    <!-- jQuery UI -->
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
 
+    <style>
+        /* CSS Reset and Basics */
+        html,
+        body,
+        div,
+        span,
+        applet,
+        object,
+        iframe,
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6,
+        p,
+        blockquote,
+        pre,
+        a,
+        abbr,
+        acronym,
+        address,
+        big,
+        cite,
+        code,
+        del,
+        dfn,
+        em,
+        font,
+        img,
+        ins,
+        kbd,
+        q,
+        s,
+        samp,
+        small,
+        strike,
+        strong,
+        sub,
+        sup,
+        tt,
+        var,
+        b,
+        u,
+        i,
+        center,
+        dl,
+        dt,
+        dd,
+        ol,
+        ul,
+        li,
+        figure,
+        header,
+        nav,
+        section,
+        article,
+        aside,
+        footer,
+        figcaption {
+            margin: 0;
+            padding: 0;
+            border: 0;
+            outline: 0;
+        }
 
-    <!-- Additional CSS Files -->
-    <link rel="stylesheet" href="assets/css/fontawesome.css">
-    <link rel="stylesheet" href="assets/css/templatemo-eduwell-style.css">
-    <link rel="stylesheet" href="assets/css/owl.css">
-    <link rel="stylesheet" href="assets/css/lightbox.css">
-<!--
+        .clearfix:after {
+            content: ".";
+            display: block;
+            clear: both;
+            visibility: hidden;
+            line-height: 0;
+            height: 0;
+        }
 
-TemplateMo 573 EduWell
+        .clearfix {
+            display: inline-block;
+        }
 
-https://templatemo.com/tm-573-eduwell
+        html[xmlns] .clearfix {
+            display: block;
+        }
 
--->
-  </head>
+        * html .clearfix {
+            height: 1%;
+        }
+
+        ul,
+        li {
+            padding: 0;
+            margin: 0;
+            list-style: none;
+        }
+
+        header,
+        nav,
+        section,
+        article,
+        aside,
+        footer,
+        hgroup {
+            display: block;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            font-family: 'Open Sans', sans-serif;
+            font-weight: 400;
+            background-color: #fff;
+            font-size: 16px;
+            -ms-text-size-adjust: 100%;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        a {
+            text-decoration: none !important;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6 {
+            margin-top: 0px;
+            margin-bottom: 0px;
+        }
+
+        ul {
+            margin-bottom: 0px;
+        }
+
+        p {
+            font-size: 14px;
+            line-height: 25px;
+            color: #4a4a4a;
+        }
+
+        img {
+            width: 100%;
+            overflow: hidden;
+        }
+
+        /* Global Styles */
+        ::selection {
+            background: #dc8cdb;
+            color: #fff;
+        }
+
+        ::-moz-selection {
+            background: #dc8cdb;
+            color: #fff;
+        }
+
+        .main-button-gradient a {
+            font-size: 13px;
+            color: #fff;
+            background: rgb(219, 138, 222);
+            background: linear-gradient(-145deg, rgba(219, 138, 222, 1) 0%, rgba(246, 191, 159, 1) 100%);
+            padding: 12px 30px;
+            display: inline-block;
+            border-radius: 5px;
+            font-weight: 500;
+            text-transform: uppercase;
+            transition: all .3s;
+        }
+
+        .main-button-gradient a:hover {
+            opacity: 0.9;
+        }
+
+        .white-button a {
+            font-size: 13px;
+            color: #dc8cdb;
+            background-color: #fff;
+            padding: 12px 30px;
+            display: inline-block;
+            border-radius: 5px;
+            font-weight: 500;
+            text-transform: uppercase;
+            transition: all .3s;
+        }
+
+        .white-button a:hover {
+            opacity: 0.9;
+        }
+
+        .text-button a {
+            font-size: 14px;
+            font-weight: 500;
+            color: #dc8cdb;
+            text-decoration: underline !important;
+            transition: all .3s;
+        }
+
+        .text-button a:hover {
+            opacity: 0.75;
+        }
+
+        section {
+            margin-top: 140px;
+        }
+
+        #contact-section {
+            padding-top: 20px;
+        }
+
+        .section-heading {
+            position: relative;
+            z-index: 2;
+            padding-top: 20px;
+            margin-top: 0px;
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .section-heading h6 {
+            font-size: 13px;
+            text-transform: uppercase;
+            color: #7a7a7a;
+            font-weight: 600;
+        }
+
+        .section-heading h4 {
+            margin-top: 10px;
+            line-height: 40px;
+            font-size: 28px;
+            font-weight: 900;
+            text-transform: capitalize;
+            color: #111;
+        }
+
+        .section-heading h4 em {
+            font-style: normal;
+            color: #dc8cdb;
+        }
+
+        .section-heading p {
+            margin-top: 30px;
+        }
+
+        /* Header */
+        .background-header {
+            background: rgb(219, 138, 222) !important;
+            background: linear-gradient(-145deg, rgba(219, 138, 222, 1) 0%, rgba(246, 191, 159, 1) 100%) !important;
+            height: 80px !important;
+            position: fixed !important;
+            top: 0 !important;
+            left: 0;
+            right: 0;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.15) !important;
+        }
+
+        .header-area {
+            background-image: url(assets/images/header-bg.png);
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            position: absolute;
+            height: 110px;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            transition: all .5s ease 0s;
+        }
+
+        .header-area .main-nav {
+            min-height: 80px;
+            background: transparent;
+        }
+
+        .header-area .main-nav .logo {
+            line-height: 100px;
+            color: #fff;
+            font-size: 28px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            float: left;
+            transition: all 0.3s ease 0s;
+        }
+
+        .background-header .main-nav .logo {
+            line-height: 75px;
+        }
+
+        .background-header .nav {
+            margin-top: 20px !important;
+        }
+
+        .header-area .main-nav .nav {
+            float: right;
+            margin-top: 35px;
+            margin-right: 0px;
+            background-color: transparent;
+            transition: all 0.3s ease 0s;
+            position: relative;
+            z-index: 999;
+        }
+
+        .header-area .main-nav .nav li {
+            padding-left: 30px;
+            padding-right: 30px;
+            display: inline-block;
+        }
+
+        .header-area .main-nav .nav li:last-child {
+            padding-right: 0px;
+        }
+
+        .header-area .main-nav .nav li a {
+            display: block;
+            font-weight: 400;
+            font-size: 14px;
+            text-transform: capitalize;
+            color: #fff;
+            transition: all 0.3s ease 0s;
+            height: 40px;
+            line-height: 40px;
+            border: transparent;
+            letter-spacing: 1px;
+        }
+
+        .header-area .main-nav .nav li:hover a,
+        .header-area .main-nav .nav li a.active {
+            color: #fff !important;
+            opacity: 0.75;
+        }
+
+        .background-header .main-nav .nav li:hover a,
+        .background-header .main-nav .nav li a.active {
+            color: #fff !important;
+            opacity: 1;
+        }
+
+        .header-area .main-nav .nav li.has-sub {
+            position: relative;
+            padding-right: 15px;
+        }
+
+        .header-area .main-nav .nav li.has-sub:after {
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            content: "\f107";
+            font-size: 12px;
+            color: #fff;
+            position: absolute;
+            right: 5px;
+            top: 12px;
+        }
+
+        .header-area .main-nav .nav li.has-sub ul.sub-menu {
+            position: absolute;
+            width: 140px;
+            box-shadow: 0 2px 28px 0 rgba(0, 0, 0, 0.06);
+            overflow: hidden;
+            top: 40px;
+            border-radius: 5px;
+            opacity: 0;
+            transition: all .3s;
+            transform: translateY(+2em);
+            visibility: hidden;
+            z-index: -1;
+        }
+
+        .header-area .main-nav .nav li.has-sub ul.sub-menu li {
+            margin-left: 0px;
+            padding: 0;
+            display: block;
+        }
+
+        .header-area .main-nav .nav li.has-sub ul.sub-menu li a {
+            opacity: 1;
+            display: block;
+            background: #f7f7f7;
+            color: #2a2a2a !important;
+            padding-left: 20px;
+            height: 40px;
+            line-height: 40px;
+            transition: all 0.3s ease 0s;
+            position: relative;
+            font-size: 12px;
+            font-weight: 400;
+            border-bottom: 1px solid #eee;
+        }
+
+        .header-area .main-nav .nav li.has-sub ul li a:hover {
+            background: #fff;
+            color: #dc8cdb !important;
+            padding-left: 25px;
+        }
+
+        .header-area .main-nav .nav li.has-sub:hover ul.sub-menu {
+            visibility: visible;
+            opacity: 1;
+            z-index: 1;
+            transform: translateY(0%);
+            transition-delay: 0s, 0s, 0.3s;
+        }
+
+        .header-area .main-nav .menu-trigger {
+            cursor: pointer;
+            display: block;
+            position: absolute;
+            top: 33px;
+            width: 32px;
+            height: 40px;
+            text-indent: -9999em;
+            z-index: 99;
+            right: 40px;
+            display: none;
+        }
+
+        .background-header .main-nav .menu-trigger {
+            top: 23px;
+        }
+
+        .header-area .main-nav .menu-trigger span,
+        .header-area .main-nav .menu-trigger span:before,
+        .header-area .main-nav .menu-trigger span:after {
+            transition: all 0.4s;
+            background-color: #fff;
+            display: block;
+            position: absolute;
+            width: 30px;
+            height: 2px;
+            left: 0;
+        }
+
+        .header-area .main-nav .menu-trigger span:before,
+        .header-area .main-nav .menu-trigger span:after {
+            content: "";
+            width: 75%;
+        }
+
+        .header-area .main-nav .menu-trigger span {
+            top: 16px;
+        }
+
+        .header-area .main-nav .menu-trigger span:before {
+            transform-origin: 33% 100%;
+            top: -10px;
+            z-index: 10;
+        }
+
+        .header-area .main-nav .menu-trigger span:after {
+            transform-origin: 33% 0;
+            top: 10px;
+        }
+
+        .header-area .main-nav .menu-trigger.active span,
+        .header-area .main-nav .menu-trigger.active span:before,
+        .header-area .main-nav .menu-trigger.active span:after {
+            background-color: transparent;
+            width: 100%;
+        }
+
+        .header-area .main-nav .menu-trigger.active span:before {
+            transform: translateY(6px) translateX(1px) rotate(45deg);
+            background-color: #fff;
+        }
+
+        .header-area .main-nav .menu-trigger.active span:after {
+            transform: translateY(-6px) translateX(1px) rotate(-45deg);
+            background-color: #fff;
+        }
+
+        .header-area.header-sticky {
+            min-height: 80px;
+        }
+
+        .header-area.header-sticky .nav li a.active {
+            color: #dc8cdb;
+        }
+
+        @media (max-width: 1200px) {
+            .header-area .main-nav .nav li {
+                padding-left: 7px;
+                padding-right: 7px;
+            }
+
+            .header-area {
+                background: rgb(219, 138, 222) !important;
+                background: linear-gradient(-145deg, rgba(219, 138, 222, 1) 0%, rgba(246, 191, 159, 1) 100%) !important;
+            }
+        }
+
+        @media (max-width: 767px) {
+            .header-area .main-nav .logo {
+                color: #1e1e1e;
+                margin-left: 30px;
+            }
+
+            .header-area.header-sticky .nav li a:hover,
+            .header-area.header-sticky .nav li a.active {
+                color: #dc8cdb !important;
+                opacity: 1;
+            }
+
+            .header-area {
+                background-color: #f7f7f7;
+                padding: 0px 15px;
+                height: 100px;
+                box-shadow: none;
+                text-align: center;
+                background-image: none !important;
+            }
+
+            .header-area .container {
+                padding: 0px;
+            }
+
+            .header-area .menu-trigger {
+                display: block !important;
+            }
+
+            .header-area .main-nav {
+                overflow: hidden;
+            }
+
+            .header-area .main-nav .nav {
+                float: none;
+                width: 100%;
+                display: none;
+                transition: all 0s;
+                margin-left: 0px;
+            }
+
+            .header-area .main-nav .nav li:first-child {
+                border-top: 1px solid #eee;
+            }
+
+            .header-area.header-sticky .nav {
+                margin-top: 100px !important;
+            }
+
+            .header-area .main-nav .nav li {
+                width: 100%;
+                background: #fff;
+                border-bottom: 1px solid #eee;
+                padding: 0 !important;
+            }
+
+            .header-area .main-nav .nav li a {
+                height: 50px !important;
+                line-height: 50px !important;
+                padding: 0 !important;
+                border: none !important;
+                background: #f7f7f7 !important;
+                color: #191a20 !important;
+            }
+
+            .header-area .main-nav .nav li a:hover {
+                background: #eee !important;
+                color: #dc8cdb !important;
+            }
+
+            .header-area .main-nav .nav li.has-sub ul.sub-menu {
+                position: relative;
+                visibility: inherit;
+                opacity: 1;
+                z-index: 1;
+                transform: translateY(0%);
+                top: 0px;
+                width: 100%;
+                box-shadow: none;
+                height: auto;
+                transition: all 0s;
+                display: none;
+            }
+
+            /* Hide submenu initially on mobile */
+            .header-area .main-nav .nav li.has-sub.is-open-sub ul.sub-menu {
+                display: block;
+            }
+
+            .header-area .main-nav .nav li.has-sub:after {
+                color: #3B566E;
+                right: 30px;
+                top: 15px;
+            }
+        }
+
+        @media (min-width: 767px) {
+            .header-area .main-nav .nav {
+                display: flex !important;
+            }
+        }
+
+        /* Banner */
+        section.main-banner {
+            margin-top: 0px;
+        }
+
+        .main-banner {
+            padding-top: 180px;
+        }
+
+        .main-banner .right-image {
+            margin-left: 120px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .main-banner .right-image img {
+            position: relative;
+            z-index: 2;
+        }
+
+        .main-banner .right-image::after {
+            position: absolute;
+            background-image: url(assets/images/banner-right-dec.png);
+            width: 378px;
+            height: 378px;
+            content: '';
+            right: -25%;
+            z-index: 1;
+        }
+
+        .main-banner .header-text::after {
+            position: absolute;
+            background-image: url(assets/images/banner-left-dec.png);
+            width: 214px;
+            height: 429px;
+            content: '';
+            left: 0;
+            bottom: -240px;
+            z-index: 1;
+        }
+
+        .main-banner .header-text h6 {
+            position: relative;
+            z-index: 2;
+            font-size: 17px;
+            font-weight: 500;
+            text-transform: capitalize;
+            color: #777777;
+        }
+
+        .main-banner .header-text h2 {
+            position: relative;
+            z-index: 2;
+            margin-top: 20px;
+            font-size: 64px;
+            color: #111111;
+            font-weight: 900;
+            line-height: 74px;
+            margin-bottom: 40px;
+        }
+
+        .main-banner .header-text h2 em {
+            font-style: normal;
+            color: #dc8cdb;
+        }
+
+        .main-banner .main-button-gradient {
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Services */
+        .services .item {
+            border-radius: 15px;
+            text-align: center;
+            padding: 50px 30px;
+            margin: 15px;
+            transition: all .3s;
+        }
+
+        .services .item:hover {
+            box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.06);
+        }
+
+        .services .item .icon {
+            max-width: 75px;
+            margin: 0 auto;
+            min-height: 80px;
+            line-height: 80px;
+            vertical-align: middle;
+        }
+
+        .services .item h4 {
+            margin-top: 15px;
+            margin-bottom: 15px;
+            font-size: 20px;
+            font-weight: 800;
+        }
+
+        .services .owl-dots {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .services .owl-dots .owl-dot {
+            width: 10px;
+            height: 10px;
+            background-color: #ddd;
+            border-radius: 50%;
+            margin: 0px 4px;
+        }
+
+        .services .owl-dots .active {
+            background-color: #dc8cdb;
+        }
+
+        /* Courses */
+        section.our-courses {
+            position: relative;
+        }
+
+        section.our-courses .section-heading p {
+            padding: 0px 60px;
+        }
+
+        section.our-courses:before {
+            position: absolute;
+            content: '';
+            background-image: url(assets/images/our-courses-left-dec.png);
+            left: 45px;
+            top: -140px;
+            width: 291px;
+            height: 231px;
+            z-index: 1;
+        }
+
+        section.our-courses:after {
+            position: absolute;
+            content: '';
+            background-image: url(assets/images/our-courses-right-dec.png);
+            right: 45px;
+            top: -140px;
+            width: 291px;
+            height: 231px;
+            z-index: 1;
+        }
+
+        section.our-courses .naccs {
+            position: relative;
+        }
+
+        section.our-courses .naccs .menu div {
+            padding: 15px 30px;
+            text-align: center;
+            border-radius: 5px !important;
+            margin-bottom: 40px;
+            font-size: 20px;
+            color: #111;
+            background-color: #fff;
+            cursor: pointer;
+            vertical-align: middle;
+            font-weight: 900;
+            transition: 1s all cubic-bezier(0.075, 0.82, 0.165, 1);
+            border: 3px solid rgba(219, 138, 222, 0.5);
+        }
+
+        section.our-courses .naccs .menu div.active {
+            color: #dc8cdb;
+            border: 3px solid rgba(219, 138, 222, 1);
+            box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        section.our-courses ul.nacc {
+            margin-left: 100px !important;
+            position: relative;
+            min-height: 100%;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            transition: 0.5s all cubic-bezier(0.075, 0.82, 0.165, 1);
+        }
+
+        section.our-courses ul.nacc li {
+            background-color: #fff;
+            overflow: hidden;
+            opacity: 0;
+            transform: translateX(50px);
+            position: absolute;
+            list-style: none;
+            transition: 1s all cubic-bezier(0.075, 0.82, 0.165, 1);
+            border-radius: 15px;
+            box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.05);
+            padding-right: 50px;
+            width: 100%;
+        }
+
+        section.our-courses ul.nacc li .left-image {
+            position: absolute;
+            margin-right: 50px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        section.our-courses ul.nacc li .left-image img {
+            border-top-left-radius: 15px;
+            border-bottom-left-radius: 15px;
+        }
+
+        section.our-courses ul.nacc li .left-image .price h6 {
+            position: absolute;
+            background: rgb(219, 138, 222);
+            background: linear-gradient(-145deg, rgba(219, 138, 222, 1) 0%, rgba(246, 191, 159, 1) 100%);
+            color: #fff;
+            top: 20px;
+            left: 20px;
+            font-size: 20px;
+            font-weight: 700;
+            width: 50px;
+            height: 50px;
+            border-radius: 3px;
+            display: inline-block;
+            text-align: center;
+            line-height: 50px;
+        }
+
+        section.our-courses ul.nacc li .right-content {
+            padding: 40px 0px;
+            margin-left: 350px;
+        }
+
+        section.our-courses ul.nacc li .right-content h4 {
+            font-size: 20px;
+            color: #111;
+            margin-bottom: 25px;
+            font-weight: 800;
+        }
+
+        section.our-courses ul.nacc li .right-content ul {
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+
+        section.our-courses ul.nacc li .right-content span {
+            font-size: 14px;
+            font-weight: 600;
+            margin-right: 30px;
+            padding-right: 30px;
+            border-right: 2px solid #111;
+        }
+
+        section.our-courses ul.nacc li .right-content .last-span {
+            margin-right: 0px;
+            padding-right: 0px;
+            border-right: none;
+        }
+
+        section.our-courses ul.nacc li .right-content p {
+            margin-bottom: 20px;
+        }
+
+        section.our-courses ul.nacc li .right-content .text-button {
+            margin-top: 20px;
+        }
+
+        section.our-courses ul.nacc li.active {
+            position: relative;
+            transition-delay: 0.3s;
+            z-index: 2;
+            opacity: 1;
+            transform: translateX(0px);
+        }
+
+        /* CTA */
+        section.simple-cta {
+            background-image: url(assets/images/cta-bg.png);
+            background-repeat: no-repeat;
+            background-position: center center;
+            background-size: cover;
+            width: 100%;
+            padding: 180px 0px 180px 0px;
+        }
+
+        section.simple-cta .left-image {
+            margin-right: 45px;
+        }
+
+        section.simple-cta h6 {
+            font-size: 17px;
+            color: #fff;
+        }
+
+        section.simple-cta h4 {
+            font-size: 62px;
+            font-weight: 900;
+            color: #fff;
+            line-height: 74px;
+            margin-top: 20px;
+        }
+
+        section.simple-cta p {
+            color: #fff;
+            margin-top: 30px;
+            margin-bottom: 40px;
+        }
+
+        /* Testimonials */
+        section.testimonials {
+            position: relative;
+        }
+
+        section.testimonials:before {
+            position: absolute;
+            content: '';
+            background-image: url(assets/images/testimonials-left-dec.png);
+            left: 0px;
+            top: -140px;
+            width: 593px;
+            height: 352px;
+            z-index: 1;
+        }
+
+        section.testimonials:after {
+            position: absolute;
+            content: '';
+            background-image: url(assets/images/testimonials-right-dec.png);
+            right: 0px;
+            bottom: -140px;
+            width: 632px;
+            height: 352px;
+            z-index: 1;
+        }
+
+        .testimonials .item {
+            border-radius: 15px;
+            padding: 30px;
+            background-color: #fff;
+            margin: 15px;
+            transition: all .3s;
+            position: relative;
+            z-index: 2;
+        }
+
+        .testimonials .item:hover {
+            box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.06);
+        }
+
+        .testimonials .item p {
+            font-size: 16px;
+            font-style: italic;
+        }
+
+        .testimonials .item h4 {
+            margin-top: 30px;
+            font-size: 20px;
+            font-weight: 900;
+            position: relative;
+        }
+
+        .testimonials .item span {
+            font-size: 13px;
+            font-weight: 700;
+            color: #dc8cdb;
+        }
+
+        .testimonials .item img {
+            max-width: 44px;
+            z-index: 2;
+            position: absolute;
+            right: 30px;
+            bottom: 30px
+        }
+
+        .testimonials .owl-dots {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .testimonials .owl-dots .owl-dot {
+            width: 10px;
+            height: 10px;
+            background-color: #ddd;
+            border-radius: 50%;
+            margin: 0px 4px;
+        }
+
+        .testimonials .owl-dots .active {
+            background-color: #dc8cdb;
+        }
+
+        /* Contact Us */
+        section.contact-us {
+            background-image: url(assets/images/footer-bg.png);
+            background-position: center center;
+            background-repeat: no-repeat;
+            background-size: cover;
+            padding: 0px;
+            position: relative;
+        }
+
+        section.contact-us:after {
+            position: absolute;
+            content: '';
+            background-image: url(assets/images/footer-left-dec.png);
+            left: 0px;
+            top: 60px;
+            width: 267px;
+            height: 396px;
+            z-index: 1;
+        }
+
+        section.contact-us .contact-info {
+            background-color: #fff;
+            margin-top: -30px;
+            box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.05);
+            border-radius: 15px;
+            z-index: 5;
+            position: relative;
+            padding: 20px;
+        }
+
+        section.contact-us .contact-info .icon i {
+            float: left;
+            margin-right: 15px;
+            width: 50px;
+            height: 50px;
+            display: inline-block;
+            text-align: center;
+            line-height: 50px;
+            border-radius: 50%;
+            background: rgb(219, 138, 222);
+            background: linear-gradient(-145deg, rgba(219, 138, 222, 1) 0%, rgba(246, 191, 159, 1) 100%);
+            color: #fff;
+        }
+
+        section.contact-us .contact-info h4 {
+            font-size: 18px;
+            font-weight: 900;
+            text-transform: uppercase;
+        }
+
+        section.contact-us .contact-info span {
+            font-size: 15px;
+            color: #dc8cdb;
+            font-weight: 700;
+        }
+
+        section.contact-us .section-heading {
+            text-align: left;
+            margin-bottom: 40px;
+        }
+
+        section.contact-us #contact {
+            margin-left: -100px;
+            position: relative;
+            z-index: 5;
+            background-color: #fff;
+            margin-top: 40px;
+            box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.05);
+            border-radius: 15px;
+            padding: 40px;
+        }
+
+        section.contact-us #contact input {
+            width: 100%;
+            height: 40px;
+            border-radius: 5px;
+            background-color: #f4f7fb;
+            outline: none;
+            border: none;
+            box-shadow: none;
+            font-size: 13px;
+            font-weight: 500;
+            color: #7a7a7a;
+            padding: 0px 15px;
+            margin-bottom: 30px;
+        }
+
+        section.contact-us #contact textarea {
+            width: 100%;
+            min-height: 140px;
+            max-height: 180px;
+            border-radius: 5px;
+            background-color: #f4f7fb;
+            outline: none;
+            border: none;
+            box-shadow: none;
+            font-size: 13px;
+            font-weight: 500;
+            color: #7a7a7a;
+            padding: 15px;
+            margin-bottom: 30px;
+        }
+
+        section.contact-us #contact button {
+            float: right;
+            font-size: 13px;
+            color: #fff;
+            background: rgb(219, 138, 222);
+            background: linear-gradient(-145deg, rgba(219, 138, 222, 1) 0%, rgba(246, 191, 159, 1) 100%);
+            padding: 12px 30px;
+            display: inline-block;
+            border-radius: 5px;
+            font-weight: 500;
+            text-transform: uppercase;
+            transition: all .3s;
+            border: none;
+            outline: none;
+        }
+
+        section.contact-us #contact button:hover {
+            opacity: 0.9;
+        }
+
+        section.contact-us ul.social-icons li {
+            display: inline-block;
+            margin: 0px 5px;
+        }
+
+        section.contact-us ul.social-icons {
+            text-align: center;
+            margin-top: 70px;
+        }
+
+        section.contact-us ul.social-icons li a {
+            width: 44px;
+            height: 44px;
+            display: inline-block;
+            text-align: center;
+            line-height: 44px;
+            background-color: #fff;
+            color: #dc8cdb;
+            border-radius: 50%;
+            transition: all .5s;
+        }
+
+        section.contact-us ul.social-icons li a:hover {
+            background-color: #dc8cdb;
+            color: #fff;
+        }
+
+        p.copyright {
+            text-align: center;
+            color: #fff;
+            margin: 40px 0px;
+        }
+
+        p.copyright a {
+            font-weight: 700;
+            color: #fff;
+        }
+
+        @media (max-width: 1200px) {
+            .main-banner .right-image {
+                margin-left: 60px;
+            }
+
+            .header-area {
+                background: rgb(219, 138, 222) !important;
+                background: linear-gradient(-145deg, rgba(219, 138, 222, 1) 0%, rgba(246, 191, 159, 1) 100%) !important;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .main-banner .header-text {
+                text-align: center;
+                margin-bottom: 60px;
+            }
+
+            .main-banner .right-image {
+                margin-left: 0px;
+            }
+
+            section.our-courses ul.nacc {
+                margin-left: 0px !important;
+            }
+
+            section.simple-cta {
+                margin-top: 0px;
+            }
+
+            section.simple-cta .left-image {
+                margin-right: 0px;
+                margin-bottom: 45px;
+            }
+
+            section.contact-us .contact-info {
+                margin-top: 15px;
+            }
+
+            section.contact-us #contact {
+                margin-left: 0px;
+            }
+
+            section.contact-us #contact button {
+                float: none;
+            }
+        }
+
+        @media (max-width: 767px) {
+
+            section.our-courses ul.nacc li .left-image,
+            section.our-team ul.nacc li .right-image {
+                position: relative;
+                margin-right: 0px;
+                margin-left: 0px;
+                transform: translateY(-0%);
+            }
+
+            section.our-courses ul.nacc li .left-image img,
+            section.our-team ul.nacc li .right-image img {
+                border-radius: 15px;
+            }
+
+            section.our-courses ul.nacc li {
+                padding: 0px;
+            }
+
+            section.our-courses ul.nacc li .right-content {
+                margin-left: 0px;
+                padding: 30px;
+            }
+
+            section.our-team ul.nacc li .left-content {
+                margin-right: 0px;
+                padding: 30px;
+            }
+        }
+    </style>
+</head>
 
 <body>
 
+    <!-- Header -->
+    <header class="header-area header-sticky">
+        <div class="container">
+            <div class="row">
+                <div class="col-12">
+                    <nav class="main-nav">
+                        <!-- Logo -->
+                        <a href="index.html" class="logo">
+                            <h2 class="text-white mt-3" style="font-weight: 800; font-size: 28px;">Mtronika</h2>
+                        </a>
+                        <!-- Menu -->
+                        <ul class="nav">
+                            <li class="scroll-to-section"><a href="#top" class="active">Home</a></li>
+                            <li class="scroll-to-section"><a href="#services">Services</a></li>
+                            <li class="scroll-to-section"><a href="#courses">Courses</a></li>
+                            <li class="has-sub">
+                                <a href="javascript:void(0)">Pages</a>
+                                <ul class="sub-menu">
+                                    <li><a href="about-us.html">About Us</a></li>
+                                    <li><a href="our-services.html">Our Services</a></li>
+                                    <li><a href="contact-us.html">Contact Us</a></li>
+                                </ul>
+                            </li>
+                            <li class="scroll-to-section"><a href="#testimonials">Testimonials</a></li>
+                            <li class="scroll-to-section"><a href="#contact-section">Contact Us</a></li>
+                        </ul>
+                        <a class='menu-trigger'>
+                            <span>Menu</span>
+                        </a>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </header>
 
-  <!-- ***** Header Area Start ***** -->
-  <header class="header-area header-sticky">
-      <div class="container">
-          <div class="row">
-              <div class="col-12">
-                  <nav class="main-nav">
-                      <!-- ***** Logo Start ***** -->
-                      <a href="index.html" class="logo">
-                          <img src="assets/images/templatemo-eduwell.png" alt="EduWell Template">
-                      </a>
-                      <!-- ***** Logo End ***** -->
-                      <!-- ***** Menu Start ***** -->
-                      <ul class="nav">
-                          <li class="scroll-to-section"><a href="#top" class="active">Home</a></li>
-                          <li class="scroll-to-section"><a href="#services">Services</a></li>
-                          <li class="scroll-to-section"><a href="#courses">Courses</a></li>
-                          <li class="has-sub">
-                              <a href="javascript:void(0)">Pages</a>
-                              <ul class="sub-menu">
-                                  <li><a href="about-us.html">About Us</a></li>
-                                  <li><a href="our-services.html">Our Services</a></li>
-                                  <li><a href="contact-us.html">Contact Us</a></li>
-                              </ul>
-                          </li>
-                          <li class="scroll-to-section"><a href="#testimonials">Testimonials</a></li> 
-                          <li class="scroll-to-section"><a href="#contact-section">Contact Us</a></li> 
-                      </ul>        
-                      <a class='menu-trigger'>
-                          <span>Menu</span>
-                      </a>
-                      <!-- ***** Menu End ***** -->
-                  </nav>
-              </div>
-          </div>
-      </div>
-  </header>
-  <!-- ***** Header Area End ***** -->
+    <!-- Banner -->
+    <section class="main-banner" id="top">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-6 align-self-center">
+                    <div class="header-text">
+                        <h6>Welcome to Mtronika</h6>
+                        <h2>Best Place To Learn <em>Digital Skills!</em></h2>
+                        <div class="main-button-gradient">
+                            <div class="scroll-to-section"><a href="#contact-section">Join Us Now!</a></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="right-image">
+                        <img src="assets/images/banner-right-image.png" alt="">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-  <!-- ***** Main Banner Area Start ***** -->
-  <section class="main-banner" id="top">
-    <div class="container">
-      <div class="row">
-        <div class="col-lg-6 align-self-center">
-          <div class="header-text">
-            <h6>Welcome to our school</h6>
-            <h2>Best Place To Learn Graphic <em>Design!</em></h2>
-            <div class="main-button-gradient">
-              <div class="scroll-to-section"><a href="#contact-section">Join Us Now!</a></div>
+    <!-- Services -->
+    <section class="services" id="services">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="section-heading">
+                        <h6>Our Services</h6>
+                        <h4>Provided <em>Services</em></h4>
+                    </div>
+                </div>
+                <div class="col-lg-12">
+                    <div class="owl-service-item owl-carousel">
+                        <div class="item">
+                            <div class="service-item">
+                                <div class="icon">
+                                    <img src="assets/images/service-icon-01.png" alt="">
+                                </div>
+                                <h4>Useful Tricks</h4>
+                                <p>Mtronika provides professional education templates and solutions for schools.</p>
+                            </div>
+                        </div>
+                        <div class="item">
+                            <div class="service-item">
+                                <div class="icon">
+                                    <img src="assets/images/service-icon-02.png" alt="">
+                                </div>
+                                <h4>Creative Ideas</h4>
+                                <p>Use our innovative tools to enhance teaching and learning experiences.</p>
+                            </div>
+                        </div>
+                        <div class="item">
+                            <div class="service-item">
+                                <div class="icon">
+                                    <img src="assets/images/service-icon-03.png" alt="">
+                                </div>
+                                <h4>Ready Target</h4>
+                                <p>Achieve your educational goals with our targeted learning programs.</p>
+                            </div>
+                        </div>
+                        <div class="item">
+                            <div class="service-item">
+                                <div class="icon">
+                                    <img src="assets/images/service-icon-04.png" alt="">
+                                </div>
+                                <h4>Technology</h4>
+                                <p>Leverage the latest technology to stay ahead in the digital age.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-          </div>
         </div>
-        <div class="col-lg-6">
-          <div class="right-image">
-            <img src="assets/images/banner-right-image.png" alt="">
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-  <!-- ***** Main Banner Area End ***** -->
+    </section>
 
-  <section class="services" id="services">
-    <div class="container">
-      <div class="row">
-        <div class="col-lg-12">
-          <div class="section-heading">
-            <h6>Our Services</h6>
-            <h4>Provided <em>Services</em></h4>
-          </div>
+    <!-- Courses -->
+    <section class="our-courses" id="courses">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-6 offset-lg-3">
+                    <div class="section-heading">
+                        <h6>OUR COURSES</h6>
+                        <h4>What You Can <em>Learn</em></h4>
+                        <p>Explore our wide range of courses designed to boost your career and skills.</p>
+                    </div>
+                </div>
+                <div class="col-lg-12">
+                    <div class="naccs">
+                        <div class="tabs">
+                            <div class="row">
+                                <div class="col-lg-3">
+                                    <div class="menu">
+                                        <div class="active gradient-border"><span>Web Development</span></div>
+                                        <div class="gradient-border"><span>Graphic Design</span></div>
+                                        <div class="gradient-border"><span>Web Design</span></div>
+                                        <div class="gradient-border"><span>WordPress</span></div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-9">
+                                    <ul class="nacc">
+                                        <li class="active">
+                                            <div>
+                                                <div class="left-image">
+                                                    <img src="assets/images/courses-01.jpg" alt="">
+                                                    <div class="price">
+                                                        <h6>$128</h6>
+                                                    </div>
+                                                </div>
+                                                <div class="right-content">
+                                                    <h4>Web Development</h4>
+                                                    <p>Learn to build modern websites using the latest technologies.
+                                                        <br><br>Join our comprehensive web development course today.</p>
+                                                    <span>36 Hours</span>
+                                                    <span>4 Weeks</span>
+                                                    <span class="last-span">3 Certificates</span>
+                                                    <div class="text-button">
+                                                        <a href="contact-us.html">Subscribe Course</a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </li>
+                                        <li>
+                                            <div>
+                                                <div class="left-image">
+                                                    <img src="assets/images/courses-02.jpg" alt="">
+                                                    <div class="price">
+                                                        <h6>$156</h6>
+                                                    </div>
+                                                </div>
+                                                <div class="right-content">
+                                                    <h4>Creative Graphic Design</h4>
+                                                    <p>Master the art of visual communication with our graphic design
+                                                        course.<br><br>Learn tools like Photoshop and Illustrator.</p>
+                                                    <span>48 Hours</span>
+                                                    <span>6 Weeks</span>
+                                                    <span class="last-span">1 Certificate</span>
+                                                    <div class="text-button">
+                                                        <a href="contact-us.html">Subscribe Course</a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </li>
+                                        <li>
+                                            <div>
+                                                <div class="left-image">
+                                                    <img src="assets/images/courses-03.jpg" alt="">
+                                                    <div class="price">
+                                                        <h6>$184</h6>
+                                                    </div>
+                                                </div>
+                                                <div class="right-content">
+                                                    <h4>Web Design</h4>
+                                                    <p>Create stunning and user-friendly web designs.<br><br>Focus on
+                                                        UI/UX best practices.</p>
+                                                    <span>28 Hours</span>
+                                                    <span>4 Weeks</span>
+                                                    <span class="last-span">1 Certificate</span>
+                                                    <div class="text-button">
+                                                        <a href="contact-us.html">Subscribe Course</a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </li>
+                                        <li>
+                                            <div>
+                                                <div class="left-image">
+                                                    <img src="assets/images/courses-04.jpg" alt="">
+                                                    <div class="price">
+                                                        <h6>$76</h6>
+                                                    </div>
+                                                </div>
+                                                <div class="right-content">
+                                                    <h4>WordPress Introduction</h4>
+                                                    <p>Get started with the world's most popular CMS.<br><br>Build and
+                                                        manage websites easily.</p>
+                                                    <span>48 Hours</span>
+                                                    <span>4 Weeks</span>
+                                                    <span class="last-span">2 Certificates</span>
+                                                    <div class="text-button">
+                                                        <a href="contact-us.html">Subscribe Course</a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="col-lg-12">
-          <div class="owl-service-item owl-carousel">
-            <div class="item">
-              <div class="service-item">
-                <div class="icon">
-                  <img src="assets/images/service-icon-01.png" alt="">
-                </div>
-                <h4>Useful Tricks</h4>
-                <p>EduWell is the professional HTML5 template for your school or university websites.</p>
-              </div>
-            </div>
-            <div class="item">
-              <div class="service-item">
-                <div class="icon">
-                  <img src="assets/images/service-icon-02.png" alt="">
-                </div>
-                <h4>Creative Ideas</h4>
-                <p>You can download and use this EduWell Template for your teaching and learning stuffs.</p>
-              </div>
-            </div>
-            <div class="item">
-              <div class="service-item">
-                <div class="icon">
-                  <img src="assets/images/service-icon-03.png" alt="">
-                </div>
-                <h4>Ready Target</h4>
-                <p>Please tell your friends about the best CSS template website that is TemplateMo.</p>
-              </div>
-            </div>
-            <div class="item">
-              <div class="service-item">
-                <div class="icon">
-                  <img src="assets/images/service-icon-04.png" alt="">
-                </div>
-                <h4>Technology</h4>
-                <p>Aenean bibendum consectetur ex eu porttitor. Pellentesque id ultrices metus.</p>
-              </div>
-            </div>
-            <div class="item">
-              <div class="service-item">
-                <div class="icon">
-                  <img src="assets/images/service-icon-01.png" alt="">
-                </div>
-                <h4>Useful Tricks</h4>
-                <p>In non nisi eget magna efficitur ultricies non quis sapien. Pellentesque tellus.</p>
-              </div>
-            </div>
-            <div class="item">
-              <div class="service-item">
-                <div class="icon">
-                  <img src="assets/images/service-icon-02.png" alt="">
-                </div>
-                <h4>Creative Ideas</h4>
-                <p>Aenean bibendum consectetur ex eu porttitor. Pellentesque id ultrices metus.</p>
-              </div>
-            </div>
-            <div class="item">
-              <div class="service-item">
-                <div class="icon">
-                  <img src="assets/images/service-icon-03.png" alt="">
-                </div>
-                <h4>Ready Target</h4>
-                <p>In non nisi eget magna efficitur ultricies non quis sapien. Pellentesque tellus.</p>
-              </div>
-            </div>
-            <div class="item">
-              <div class="service-item">
-                <div class="icon">
-                  <img src="assets/images/service-icon-04.png" alt="">
-                </div>
-                <h4>Technology</h4>
-                <p>Aenean bibendum consectetur ex eu porttitor. Pellentesque id ultrices metus.</p>
-              </div>
-            </div>
-            <div class="item">
-              <div class="service-item">
-                <div class="icon">
-                  <img src="assets/images/service-icon-01.png" alt="">
-                </div>
-                <h4>Useful Tricks</h4>
-                <p>In non nisi eget magna efficitur ultricies non quis sapien. Pellentesque tellus.</p>
-              </div>
-            </div>
-            <div class="item">
-              <div class="service-item">
-                <div class="icon">
-                  <img src="assets/images/service-icon-02.png" alt="">
-                </div>
-                <h4>Creative Ideas</h4>
-                <p>Aenean bibendum consectetur ex eu porttitor. Pellentesque id ultrices metus.</p>
-              </div>
-            </div>
-            <div class="item">
-              <div class="service-item">
-                <div class="icon">
-                  <img src="assets/images/service-icon-03.png" alt="">
-                </div>
-                <h4>Ready Target</h4>
-                <p>In non nisi eget magna efficitur ultricies non quis sapien. Pellentesque tellus.</p>
-              </div>
-            </div>
-            <div class="item">
-              <div class="service-item">
-                <div class="icon">
-                  <img src="assets/images/service-icon-04.png" alt="">
-                </div>
-                <h4>Technology</h4>
-                <p>Praesent accumsan condimentum arcu, id porttitor est semper nec. Nunc diam lorem.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
+    </section>
 
-  <section class="our-courses" id="courses">
-    <div class="container">
-      <div class="row">
-        <div class="col-lg-6 offset-lg-3">
-          <div class="section-heading">
-            <h6>OUR COURSES</h6>
-            <h4>What You Can <em>Learn</em></h4>
-            <p>You just think about TemplateMo whenever you need free CSS templates for your business website</p>
-          </div>
-        </div>
-        <div class="col-lg-12">
-          <div class="naccs">
-            <div class="tabs">
-              <div class="row">
-                <div class="col-lg-3">
-                  <div class="menu">
-                    <div class="active gradient-border"><span>Web Development</span></div>
-                    <div class="gradient-border"><span>Graphic Design</span></div>
-                    <div class="gradient-border"><span>Web Design</span></div>
-                    <div class="gradient-border"><span>WordPress</span></div>
-                  </div>
+    <!-- CTA -->
+    <section class="simple-cta">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-5 offset-lg-1">
+                    <div class="left-image">
+                        <img src="assets/images/cta-left-image.png" alt="">
+                    </div>
                 </div>
-                <div class="col-lg-9">
-                  <ul class="nacc">
-                    <li class="active">
-                      <div>
-                        <div class="left-image">
-                          <img src="assets/images/courses-01.jpg" alt="">
-                          <div class="price"><h6>$128</h6></div>
+                <div class="col-lg-5 align-self-center">
+                    <h6>Get the sale right now!</h6>
+                    <h4>Up to 50% OFF For 1+ courses</h4>
+                    <p>Don't miss out on this limited time offer to enhance your skills.</p>
+                    <div class="white-button">
+                        <a href="contact-us.html">View Courses</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section class="testimonials" id="testimonials">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="section-heading">
+                        <h6>Testimonials</h6>
+                        <h4>What They <em>Think</em></h4>
+                    </div>
+                </div>
+                <div class="col-lg-12">
+                    <div class="owl-testimonials owl-carousel" style="position: relative; z-index: 5;">
+                        <div class="item">
+                            <p>“Mtronika provided excellent resources for our school website.”</p>
+                            <h4>Catherine Walk</h4>
+                            <span>CEO &amp; Founder</span>
+                            <img src="assets/images/quote.png" alt="">
                         </div>
-                        <div class="right-content">
-                          <h4>Web Development</h4>
-                          <p>Did you know that you can visit <a rel="nofollow" href="https://www.toocss.com/" target="_blank">TooCSS website</a> for latest listing of HTML templates and a variety of useful templates. 
-                          <br><br>You just need to go and visit that website right now. IF you have any suggestion or comment about this template, you can feel free to go to contact page for our email address.</p>
-                          <span>36 Hours</span>
-                          <span>4 Weeks</span>
-                          <span class="last-span">3 Certificates</span>
-                          <div class="text-button">
-                            <a href="contact-us.html">Subscribe Course</a>
-                          </div>
+                        <div class="item">
+                            <p>“The best place for educational templates and solutions.”</p>
+                            <h4>David Martin</h4>
+                            <span>CTO of Tech Company</span>
+                            <img src="assets/images/quote.png" alt="">
                         </div>
-                      </div>
-                    </li>
-                    <li>
-                      <div>
-                        <div class="left-image">
-                          <img src="assets/images/courses-02.jpg" alt="">
-                          <div class="price"><h6>$156</h6></div>
+                        <div class="item">
+                            <p>“Highly recommended for anyone looking for quality design.”</p>
+                            <h4>Sophia Whity</h4>
+                            <span>CEO and Co-Founder</span>
+                            <img src="assets/images/quote.png" alt="">
                         </div>
-                        <div class="right-content">
-                          <h4>Creative Graphic Design</h4>
-                          <p>You are not allowed to redistribute this template ZIP file on any other website without a permission from us.<br><br>There are some unethical people on this world copied and reposted our templates without any permission from us. Their Karma will hit them really hard. Yeah!</p>
-                          <span>48 Hours</span>
-                          <span>6 Weeks</span>
-                          <span class="last-span">1 Certificate</span>
-                          <div class="text-button">
-                            <a href="contact-us.html">Subscribe Course</a>
-                          </div>
+                        <div class="item">
+                            <p>“Professional and reliable service.”</p>
+                            <h4>Helen Shiny</h4>
+                            <span>Tech Officer</span>
+                            <img src="assets/images/quote.png" alt="">
                         </div>
-                      </div>
-                    </li>
-                    <li>
-                      <div>
-                        <div class="left-image">
-                          <img src="assets/images/courses-03.jpg" alt="">
-                          <div class="price"><h6>$184</h6></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact -->
+    <section class="contact-us" id="contact-section">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8">
+                    <div id="map">
+                        <iframe
+                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3580.444747764834!2d28.0003003!3d-26.1822003!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjbCsDEwJzU1LjkiUyAyOMKwMDAnMDEuMSJF!5e0!3m2!1sen!2sza!4v1644335269264!5m2!1sen!2sza"
+                            width="100%" height="420px" frameborder="0"
+                            style="border:0; border-radius: 15px; position: relative; z-index: 2;"
+                            allowfullscreen=""></iframe>
+                        <div class="row">
+                            <div class="col-lg-4 offset-lg-1">
+                                <div class="contact-info">
+                                    <div class="icon">
+                                        <i class="fa fa-phone"></i>
+                                    </div>
+                                    <h4>Phone</h4>
+                                    <span>010-020-0340</span>
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="contact-info">
+                                    <div class="icon">
+                                        <i class="fa fa-phone"></i>
+                                    </div>
+                                    <h4>Mobile</h4>
+                                    <span>090-080-0760</span>
+                                </div>
+                            </div>
                         </div>
-                        <div class="right-content">
-                          <h4>Web Design</h4>
-                          <p>Quinoa roof party squid prism sustainable letterpress cray hammock tumeric man bun mixtape tofu subway tile cronut. Deep v ennui subway tile organic seitan.<br><br>Kogi VHS freegan bicycle rights try-hard green juice probably haven't heard of them cliche la croix af chillwave.</p>
-                          <span>28 Hours</span>
-                          <span>4 Weeks</span>
-                          <span class="last-span">1 Certificate</span>
-                          <div class="text-button">
-                            <a href="contact-us.html">Subscribe Course</a>
-                          </div>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <form id="contact" action="" method="post">
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <div class="section-heading">
+                                    <h6>Contact us</h6>
+                                    <h4>Say <em>Hello</em></h4>
+                                    <p>We'd love to hear from you. Send us a message below.</p>
+                                </div>
+                            </div>
+                            <div class="col-lg-12">
+                                <fieldset>
+                                    <input type="name" name="name" id="name" placeholder="Full Name" autocomplete="on"
+                                        required>
+                                </fieldset>
+                            </div>
+                            <div class="col-lg-12">
+                                <fieldset>
+                                    <input type="text" name="email" id="email" pattern="[^ @]*@[^ @]*"
+                                        placeholder="Your Email" required="">
+                                </fieldset>
+                            </div>
+                            <div class="col-lg-12">
+                                <fieldset>
+                                    <textarea name="message" id="message" placeholder="Your Message"></textarea>
+                                </fieldset>
+                            </div>
+                            <div class="col-lg-12">
+                                <fieldset>
+                                    <button type="submit" id="form-submit" class="main-gradient-button">Send
+                                        Message</button>
+                                </fieldset>
+                            </div>
                         </div>
-                      </div>
-                    </li>
-                    <li>
-                      <div>
-                        <div class="left-image">
-                          <img src="assets/images/courses-04.jpg" alt="">
-                          <div class="price"><h6>$76</h6></div>
-                        </div>
-                        <div class="right-content">
-                          <h4>WordPress Introduction</h4>
-                          <p>Quinoa roof party squid prism sustainable letterpress cray hammock tumeric man bun mixtape tofu subway tile cronut. Deep v ennui subway tile organic seitan.<br><br>Kogi VHS freegan bicycle rights try-hard green juice probably haven't heard of them cliche la croix af chillwave.</p>
-                          <span>48 Hours</span>
-                          <span>4 Weeks</span>
-                          <span class="last-span">2 Certificates</span>
-                          <div class="text-button">
-                            <a href="contact-us.html">Subscribe Course</a>
-                          </div>
-                        </div>
-                      </div>
-                      </li>
+                    </form>
+                </div>
+                <div class="col-lg-12">
+                    <ul class="social-icons">
+                        <li><a href="#"><i class="fa fa-facebook"></i></a></li>
+                        <li><a href="#"><i class="fa fa-twitter"></i></a></li>
+                        <li><a href="#"><i class="fa fa-linkedin"></i></a></li>
+                        <li><a href="#"><i class="fa fa-rss"></i></a></li>
+                        <li><a href="#"><i class="fa fa-dribbble"></i></a></li>
                     </ul>
                 </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section class="simple-cta">
-    <div class="container">
-      <div class="row">
-        <div class="col-lg-5 offset-lg-1">
-          <div class="left-image">
-            <img src="assets/images/cta-left-image.png" alt="">
-          </div>
-        </div>
-        <div class="col-lg-5 align-self-center">
-          <h6>Get the sale right now!</h6>
-          <h4>Up to 50% OFF For 1+ courses</h4>
-          <p>Kogi VHS freegan bicycle rights try-hard green juice probably haven't heard of them cliche la croix af chillwave.</p>
-          <div class="white-button">
-            <a href="contact-us.html">View Courses</a>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section class="testimonials" id="testimonials">
-    <div class="container">
-      <div class="row">
-        <div class="col-lg-12">
-          <div class="section-heading">
-            <h6>Testimonials</h6>
-            <h4>What They <em>Think</em></h4>
-          </div>
-        </div>
-        <div class="col-lg-12">
-          <div class="owl-testimonials owl-carousel" style="position: relative; z-index: 5;">
-            <div class="item">
-              <p>“just think about TemplateMo if you need free CSS templates for your website”</p>
-                <h4>Catherine Walk</h4>
-                <span>CEO &amp; Founder</span>
-                <img src="assets/images/quote.png" alt="">
-            </div>
-            <div class="item">
-              <p>“think about our website first when you need free HTML templates for your website”</p>
-                <h4>David Martin</h4>
-                <span>CTO of Tech Company</span>
-                <img src="assets/images/quote.png" alt="">
-            </div>
-            <div class="item">
-              <p>“just think about our website wherever you need free templates for your website”</p>
-                <h4>Sophia Whity</h4>
-                <span>CEO and Co-Founder</span>
-                <img src="assets/images/quote.png" alt="">
-            </div>
-            <div class="item">
-              <p>“Praesent accumsan condimentum arcu, id porttitor est semper nec. Nunc diam lorem.”</p>
-                <h4>Helen Shiny</h4>
-                <span>Tech Officer</span>
-                <img src="assets/images/quote.png" alt="">
-            </div>
-            <div class="item">
-              <p>“Praesent accumsan condimentum arcu, id porttitor est semper nec. Nunc diam lorem.”</p>
-                <h4>George Soft</h4>
-                <span>Gadget Reviewer</span>
-                <img src="assets/images/quote.png" alt="">
-            </div>
-            <div class="item">
-              <p>“Praesent accumsan condimentum arcu, id porttitor est semper nec. Nunc diam lorem.”</p>
-                <h4>Andrew Hall</h4>
-                <span>Marketing Manager</span>
-                <img src="assets/images/quote.png" alt="">
-            </div>
-            <div class="item">
-              <p>“Praesent accumsan condimentum arcu, id porttitor est semper nec. Nunc diam lorem.”</p>
-                <h4>Maxi Power</h4>
-                <span>Fashion Designer</span>
-                <img src="assets/images/quote.png" alt="">
-            </div>
-            <div class="item">
-              <p>“Praesent accumsan condimentum arcu, id porttitor est semper nec. Nunc diam lorem.”</p>
-                <h4>Olivia Too</h4>
-                <span>Creative Designer</span>
-                <img src="assets/images/quote.png" alt="">
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section class="contact-us" id="contact-section">
-    <div class="container">
-      <div class="row">
-        <div class="col-lg-8">
-          <div id="map">
-          
-            <!-- You just need to go to Google Maps for your own map point, and copy the embed code from Share -> Embed a map section -->
-            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d7151.84524236698!2d-122.19494600413192!3d47.56605883252286!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x5490695e625f8965%3A0xf99b055e76477def!2sNewcastle%20Beach%20Park%20Playground%2C%20Bellevue%2C%20WA%2098006%2C%20USA!5e0!3m2!1sen!2sth!4v1644335269264!5m2!1sen!2sth" width="100%" height="420px" frameborder="0" style="border:0; border-radius: 15px; position: relative; z-index: 2;" allowfullscreen=""></iframe>
-            <div class="row">
-              <div class="col-lg-4 offset-lg-1">
-                <div class="contact-info">
-                  <div class="icon">
-                    <i class="fa fa-phone"></i>
-                  </div>
-                  <h4>Phone</h4>
-                  <span>010-020-0340</span>
+                <div class="col-lg-12">
+                    <p class="copyright">Copyright © 2024 Mtronika. All Rights Reserved.
+                        <br>Distribution: <a rel="sponsored" href="https://mtronika.co.za" target="_blank">Mtronika</a>
+                    </p>
                 </div>
-              </div>
-              <div class="col-lg-4">
-                <div class="contact-info">
-                  <div class="icon">
-                    <i class="fa fa-phone"></i>
-                  </div>
-                  <h4>Mobile</h4>
-                  <span>090-080-0760</span>
-                </div>
-              </div>
             </div>
-          </div>
         </div>
-        <div class="col-lg-4">
-          <form id="contact" action="" method="post">
-            <div class="row">
-              <div class="col-lg-12">
-                <div class="section-heading">
-                  <h6>Contact us</h6>
-                  <h4>Say <em>Hello</em></h4>
-                  <p>IF you need a working contact form by PHP script, please visit TemplateMo's contact page for more info.</p>
-                </div>
-              </div>
-              <div class="col-lg-12">
-                <fieldset>
-                  <input type="name" name="name" id="name" placeholder="Full Name" autocomplete="on" required>
-                </fieldset>
-              </div>
-              <div class="col-lg-12">
-                <fieldset>
-                  <input type="text" name="email" id="email" pattern="[^ @]*@[^ @]*" placeholder="Your Email" required="">
-                </fieldset>
-              </div>
-              <div class="col-lg-12">
-                <fieldset>
-                  <textarea name="message" id="message" placeholder="Your Message"></textarea>
-                </fieldset>
-              </div>
-              <div class="col-lg-12">
-                <fieldset>
-                  <button type="submit" id="form-submit" class="main-gradient-button">Send Message</button>
-                </fieldset>
-              </div>
-            </div>
-          </form>
-        </div>
-        <div class="col-lg-12">
-          <ul class="social-icons">
-            <li><a href="#"><i class="fa fa-facebook"></i></a></li>
-            <li><a href="#"><i class="fa fa-twitter"></i></a></li>
-            <li><a href="#"><i class="fa fa-linkedin"></i></a></li>
-            <li><a href="#"><i class="fa fa-rss"></i></a></li>
-            <li><a href="#"><i class="fa fa-dribbble"></i></a></li>
-          </ul>
-        </div>
-        <div class="col-lg-12">
-          <p class="copyright">Copyright © 2022 EduWell Co., Ltd. All Rights Reserved. 
-          
-          <br>Design: <a rel="sponsored" href="https://templatemo.com" target="_blank">TemplateMo</a>
-          <br>Distribution: <a rel="sponsored" href="https://mtronika.co.za" target="_blank">Mtronika</a></p>
-        </div>
-      </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- Scripts -->
-  <!-- Bootstrap core JavaScript -->
-    <script src="vendor/jquery/jquery.min.js"></script>
-    <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.6.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/owl.carousel.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/isotope/3.0.6/isotope.pkgd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/js/lightbox.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
 
-    <script src="assets/js/isotope.min.js"></script>
-    <script src="assets/js/owl-carousel.js"></script>
-    <script src="assets/js/lightbox.js"></script>
-    <script src="assets/js/tabs.js"></script>
-    <script src="assets/js/video.js"></script>
-    <script src="assets/js/slick-slider.js"></script>
-    <script src="assets/js/custom.js"></script>
     <script>
-        //according to loftblog tut
-        $('.nav li:first').addClass('active');
+        (function ($) {
+            "use strict";
 
-        var showSection = function showSection(section, isAnimate) {
-          var
-          direction = section.replace(/#/, ''),
-          reqSection = $('.section').filter('[data-section="' + direction + '"]'),
-          reqSectionPos = reqSection.offset().top - 0;
+            // Sticky Header
+            $(window).scroll(function () {
+                var scroll = $(window).scrollTop();
+                var box = $('.header-text').height();
+                var header = $('header').height();
 
-          if (isAnimate) {
-            $('body, html').animate({
-              scrollTop: reqSectionPos },
-            800);
-          } else {
-            $('body, html').scrollTop(reqSectionPos);
-          }
+                if (scroll >= box - header) {
+                    $("header").addClass("background-header");
+                } else {
+                    $("header").removeClass("background-header");
+                }
+            });
 
-        };
+            // Tabs Logic (Isotope Replacement for simple tabs view or similar)
+            // Note: The template actually uses custom logic for .naccs tabs below, not Isotope.
+            // But we keep Isotope if needed for other grids.
+            var $grid = $(".grid").isotope({
+                itemSelector: ".all",
+                percentPosition: true,
+                masonry: {
+                    columnWidth: ".all"
+                }
+            });
 
-        var checkSection = function checkSection() {
-          $('.section').each(function () {
-            var
-            $this = $(this),
-            topEdge = $this.offset().top - 80,
-            bottomEdge = topEdge + $this.height(),
-            wScroll = $(window).scrollTop();
-            if (topEdge < wScroll && bottomEdge > wScroll) {
-              var
-              currentId = $this.data('section'),
-              reqLink = $('a').filter('[href*=\\#' + currentId + ']');
-              reqLink.closest('li').addClass('active').
-              siblings().removeClass('active');
+            // Custom Accordion
+            const Accordion = {
+                settings: {
+                    first_expanded: false,
+                    toggle: false
+                },
+                openAccordion: function (toggle, content) {
+                    if (content.children.length) {
+                        toggle.classList.add("is-open");
+                        let final_height = Math.floor(content.children[0].offsetHeight);
+                        content.style.height = final_height + "px";
+                    }
+                },
+                closeAccordion: function (toggle, content) {
+                    toggle.classList.remove("is-open");
+                    content.style.height = 0;
+                },
+                init: function (el) {
+                    const _this = this;
+                    let is_first_expanded = _this.settings.first_expanded;
+                    if (el.classList.contains("is-first-expanded")) is_first_expanded = true;
+                    let is_toggle = _this.settings.toggle;
+                    if (el.classList.contains("is-toggle")) is_toggle = true;
+
+                    const sections = el.getElementsByClassName("accordion");
+                    const all_toggles = el.getElementsByClassName("accordion-head");
+                    const all_contents = el.getElementsByClassName("accordion-body");
+                    for (let i = 0; i < sections.length; i++) {
+                        const section = sections[i];
+                        const toggle = all_toggles[i];
+                        const content = all_contents[i];
+                        toggle.addEventListener("click", function (e) {
+                            if (!is_toggle) {
+                                for (let a = 0; a < all_contents.length; a++) {
+                                    _this.closeAccordion(all_toggles[a], all_contents[a]);
+                                }
+                                _this.openAccordion(toggle, content);
+                            } else {
+                                if (toggle.classList.contains("is-open")) {
+                                    _this.closeAccordion(toggle, content);
+                                } else {
+                                    _this.openAccordion(toggle, content);
+                                }
+                            }
+                        });
+                        if (i === 0 && is_first_expanded) {
+                            _this.openAccordion(toggle, content);
+                        }
+                    }
+                }
+            };
+
+            (function () {
+                const accordions = document.getElementsByClassName("accordions");
+                for (let i = 0; i < accordions.length; i++) {
+                    Accordion.init(accordions[i]);
+                }
+            })();
+
+            // Tabs Switching Logic (.naccs)
+            $(document).on("click", ".naccs .menu div", function () {
+                var numberIndex = $(this).index();
+
+                if (!$(this).hasClass("active")) {
+                    $(".naccs .menu div").removeClass("active");
+                    $(".naccs ul li").removeClass("active");
+
+                    $(this).addClass("active");
+                    $(".naccs ul").find("li:eq(" + numberIndex + ")").addClass("active");
+
+                    var listItemHeight = $(".naccs ul")
+                        .find("li:eq(" + numberIndex + ")")
+                        .innerHeight();
+                    $(".naccs ul").height(listItemHeight + "px");
+                }
+            });
+
+            // Owl Carousel: Services
+            $('.owl-service-item').owlCarousel({
+                items: 4,
+                loop: true,
+                dots: true,
+                nav: false,
+                autoplay: true,
+                margin: 15,
+                responsive: {
+                    0: { items: 1 },
+                    600: { items: 2 },
+                    1000: { items: 4 }
+                }
+            });
+
+            // Owl Carousel: Testimonials
+            $('.owl-testimonials').owlCarousel({
+                items: 3,
+                loop: true,
+                dots: true,
+                nav: false,
+                autoplay: true,
+                margin: 15,
+                responsive: {
+                    0: { items: 1 },
+                    600: { items: 2 },
+                    1000: { items: 3 }
+                }
+            });
+
+            // Menu Dropdown Toggle
+            if ($('.menu-trigger').length) {
+                $(".menu-trigger").on('click', function () {
+                    $(this).toggleClass('active');
+                    $('.header-area .nav').slideToggle(200);
+                });
             }
-          });
-        };
 
-        $('.main-menu, .responsive-menu, .scroll-to-section').on('click', 'a', function (e) {
-          e.preventDefault();
-          showSection($(this).attr('href'), true);
-        });
+            // Smooth Scroll
+            $('.scroll-to-section a[href*=\\#]:not([href=\\#])').on('click', function () {
+                if (location.pathname.replace(/^\//, '') == this.pathname.replace(/^\//, '') && location.hostname == this.hostname) {
+                    var target = $(this.hash);
+                    target = target.length ? target : $('[name=' + this.hash.slice(1) + ']');
+                    if (target.length) {
+                        var width = $(window).width();
+                        if (width < 991) {
+                            $('.menu-trigger').removeClass('active');
+                            $('.header-area .nav').slideUp(200);
+                        }
+                        $('html,body').animate({
+                            scrollTop: (target.offset().top) - 80
+                        }, 700);
+                        return false;
+                    }
+                }
+            });
 
-        $(window).scroll(function () {
-          checkSection();
-        });
+            // Active Menu Item on Scroll
+            $(document).ready(function () {
+                $(document).on("scroll", onScroll);
+                $('.scroll-to-section a[href^="#"]').on('click', function (e) {
+                    e.preventDefault();
+                    $(document).off("scroll");
+                    $('.scroll-to-section a').each(function () {
+                        $(this).removeClass('active');
+                    })
+                    $(this).addClass('active');
+                    var target = this.hash;
+                    var $target = $(target);
+                    $('html, body').stop().animate({
+                        scrollTop: ($target.offset().top) - 79
+                    }, 500, 'swing', function () {
+                        window.location.hash = target;
+                        $(document).on("scroll", onScroll);
+                    });
+                });
+            });
+
+            function onScroll(event) {
+                var scrollPos = $(document).scrollTop();
+                $('.nav a').each(function () {
+                    var currLink = $(this);
+                    if (currLink.attr("href").startsWith("#")) {
+                        var refElement = $(currLink.attr("href"));
+                        if (refElement.length && refElement.position().top <= scrollPos && refElement.position().top + refElement.height() > scrollPos) {
+                            $('.nav ul li a').removeClass("active");
+                            currLink.addClass("active");
+                        } else {
+                            currLink.removeClass("active");
+                        }
+                    }
+                });
+            }
+
+            // Counter Logic
+            function visible(partial) {
+                var $t = partial,
+                    $w = jQuery(window),
+                    viewTop = $w.scrollTop(),
+                    viewBottom = viewTop + $w.height(),
+                    _top = $t.offset().top,
+                    _bottom = _top + $t.height(),
+                    compareTop = partial === true ? _bottom : _top,
+                    compareBottom = partial === true ? _top : _bottom;
+                return ((compareBottom <= viewBottom) && (compareTop >= viewTop) && $t.is(':visible'));
+            }
+
+            $(window).scroll(function () {
+                if (visible($('.count-digit'))) {
+                    if ($('.count-digit').hasClass('counter-loaded')) return;
+                    $('.count-digit').addClass('counter-loaded');
+                    $('.count-digit').each(function () {
+                        var $this = $(this);
+                        jQuery({ Counter: 0 }).animate({
+                            Counter: $this.text()
+                        }, {
+                            duration: 3000,
+                            easing: 'swing',
+                            step: function () {
+                                $this.text(Math.ceil(this.Counter));
+                            }
+                        });
+                    });
+                }
+            });
+
+        })(window.jQuery);
     </script>
 </body>
 
