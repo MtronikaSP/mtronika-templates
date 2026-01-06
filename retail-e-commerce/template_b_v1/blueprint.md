@@ -1,109 +1,181 @@
-# Retail E-Commerce Template B - Karl (Fashion)
+# Blueprint: Retail E-Commerce Industry (Variant B - Fashion)
 
-## Template Overview
-- **Theme**: Fashion E-Commerce
-- **Template Name**: Karl
-- **Primary Color**: Black/White minimalist
-- **Fonts**: Custom fonts with Themify Icons
-- **Framework**: Bootstrap 4
+## Meta
+- **Industry**: Retail / Fashion E-Commerce
+- **Style**: Minimalist, Elegant, High-End Fashion
+- **Color Palette**: Black/White minimalist + Accent colors
+- **Target Pages**: 4-12 (vBronze to vGold)
+- **Template Source**: Karl
 
-## Page Sections
+---
 
-### 1. Side Category Menu
-- **Class**: `catagories-side-menu`
-- **Trigger**: `#sideMenuBtn`
-- **Categories**: Collapsible menu
-  - Woman Wear, Man Wear, Children
-  - Bags & Purses, Eyewear, Footwear
+## Sections
 
-### 2. Header Area
-- **Class**: `header_area`
-- **Top Header**:
-  - Logo (image-based)
-  - Cart dropdown with preview items
-  - Side menu trigger button
-- **Main Header**:
-  - Social links (Pinterest, Facebook, Twitter, LinkedIn)
-  - Main navigation (Home, Pages dropdown, Dresses, Shoes, Contact)
-  - Help Line phone number
+### 1. Side Category Menu (Optional)
+- **Type**: Off-canvas collapsible menu
+- **Trigger**: Hamburger icon
+- **Categories**: Collapsible list (Women, Men, Kids, Accessories, Footwear)
+- **Style**: Slide-in from left
+
+### 2. Header
+- **Top Header**: Logo (centered or left) + Cart dropdown (with item preview) + Menu trigger
+- **Main Header**: Social links + Main navigation + Helpline phone number
+- **Cart Dropdown**: Mini cart with product previews
+- **Style**: Clean, minimal
 
 ### 3. Top Discount Banner
-- **Class**: `top-discount-area`
-- **Layout**: 3-column flex
-- **Content**: Free Shipping, Discount codes, Student discounts
+- **Layout**: 3-column flex bar
+- **Content**: Free Shipping notice, Discount codes, Special offers
+- **Style**: Light background, centered text
 
-### 4. Welcome Slides
-- **Class**: `welcome_area`
-- **Type**: Owl Carousel (`welcome_slides`)
-- **Slides**: 3 full-screen background slides
-- **Content**: Subtitle, headline, CTA button
-- **Animation**: Data attributes for animations
+### 4. Hero Slider
+- **Type**: Owl Carousel
+- **Slides**: 3 fullscreen fashion images
+- **Content**: Subtitle + Headline + "Shop Now" CTA
+- **Animations**: Entrance animations on content
+- **ID**: `#hero`
 
-### 5. Top Category Section
-- **Class**: `top_catagory_area`
+### 5. Category Banners
 - **Layout**: 2-column full-width
-- **Cards**: Background image with overlay
-- **Content**: Category name, sale %, CTA
+- **Cards**: Category image with overlay
+- **Content**: Category name + Sale percentage + CTA
+- **Categories**: Men's Fashion, Women's Fashion (or custom)
 
 ### 6. Quick View Modal
+- **Type**: Bootstrap Modal
+- **Content**: Product image + Title + Rating + Price + Description + Quantity + Add to Cart + Wishlist
 - **ID**: `#quickview`
-- **Type**: Bootstrap modal
-- **Content**:
-  - Product image
-  - Title, rating, price
-  - Description, full product link
-  - Quantity selector, Add to Cart
-  - Wishlist, Compare buttons
-  - Share with friends
 
-### 7. New Arrivals Section
-- **Class**: `new_arrivals_area`
-- **Filter Menu**: ALL, WOMAN, MAN, ACCESSORIES, SHOES, KIDS
-- **Layout**: Isotope grid (3 columns)
-- **Product Cards**:
-  - Image with quick view button
-  - Price, title
-  - Add to Cart button
-- **Animation**: `wow fadeInUpBig`
+### 7. New Arrivals/Products Section
+- **Layout**: Isotope filterable grid
+- **Filter Menu**: All, Women, Men, Accessories, Shoes, Kids
+- **Product Cards**: Image + Quick view button + Price + Title + Add to Cart
+- **Animation**: fadeInUp on scroll
+- **ID**: `#products`
 
-### 8. Offer/Banner Section
-- **Class**: `offer_area`
-- **Background**: Full-width image
-- **Content**: Product name, hot badge, free shipping, price, CTA
+### 8. Promotional Banner
+- **Layout**: Full-width image background
+- **Content**: Product spotlight + Hot badge + Free shipping + Price + CTA
+- **Style**: Overlay text on image
 
 ### 9. Testimonials Section
-- **Class**: `karl-testimonials-area`
 - **Type**: Owl Carousel
 - **Layout**: Centered single testimonial
-- **Content**: Quote, testimonial text, client photo + info
+- **Content**: Quote + Customer photo + Name + Location
 
 ### 10. Footer
-- **Class**: `footer_area`
+- **Layout**: 4-column
 - **Columns**:
-  - Logo + copyright
+  - Logo + Copyright
   - About links (About, Blog, FAQ, Returns, Contact)
-  - Account links (My Account, Shipping, Policies, Affiliates)
+  - Account links (My Account, Shipping, Policies)
   - Newsletter subscription form
-- **Footer Bottom**: Social icons (Pinterest, Facebook, Twitter, LinkedIn)
+- **Footer Bottom**: Social icons (Pinterest, Facebook, Twitter, Instagram)
+- **Copyright**: © 2026 {{business_name}}. Designed by Mtronika.
 
-## Key Features
-- **Isotope Filtering**: Product filtering by category
-- **Quick View Modal**: Product preview without page change
-- **Cart Dropdown**: Mini cart in header
-- **Side Category Menu**: Collapsible off-canvas menu
-- **Animated Carousel**: Custom data-animation attributes
+---
 
-## Dependencies
-- jQuery 2.2.4
-- Popper.js
-- Bootstrap 4
-- Plugins.js (bundled plugins)
-- Active.js (custom scripts)
-- Themify Icons
-
-## Styling Notes
-- Minimalist black/white design
+## CSS Requirements
+- Bootstrap 4.x or 5.x (CDN)
+- Themify Icons or FontAwesome 6.x
+- Google Fonts: Poppins, Playfair Display
+- Brand color override:
+  ```css
+  :root { --primary: {{brand_colour}}; --dark: #1A1A1A; }
+  .btn-primary { background: var(--primary); }
+  ```
+- Minimalist black/white aesthetic
 - Elegant typography
-- Clean product grid layout
-- Hover effects on product images
-- Responsive design with mobile menu
+- Mobile-first responsive design
+- Product hover effects
+
+## JavaScript Requirements
+- jQuery 3.6.x
+- Bootstrap Bundle
+- Owl Carousel 2.3.4 for hero/testimonials
+- Isotope.js for product filtering
+- WOW.js for scroll animations
+- Quick view modal functionality
+- Cart dropdown interactions
+- Side menu toggle
+- WhatsApp float button (bottom-right, links to {{whatsapp}})
+
+---
+
+## Variable Placeholders
+- `{{business_name}}` - Store name
+- `{{phone}}` - Phone number
+- `{{email}}` - Email address
+- `{{city}}` - City location
+- `{{brand_colour}}` - Hex color code (default: #1A1A1A)
+- `{{whatsapp}}` - WhatsApp number (27xxxxxxxxx format)
+
+---
+
+## SEO Keywords (South Africa Focus)
+### Primary Keywords
+- fashion store {{city}}
+- clothing South Africa
+- online fashion {{city}}
+- designer clothes Gauteng
+- boutique near me
+
+### Long-tail Keywords
+- affordable fashion {{city}}
+- trendy clothing South Africa
+- women's fashion near me
+- men's fashion {{city}}
+- latest styles Gauteng
+
+### Meta Tags
+- **Title**: {{business_name}} | Trendy Fashion & Clothing in {{city}}
+- **Description**: Discover the latest fashion trends at {{business_name}} in {{city}}, South Africa. Quality clothing, great prices, stylish looks. Shop now!
+- **Keywords**: fashion, clothing, boutique, style, {{city}}, South Africa, trendy
+
+### Schema.org Markup
+```json
+{
+  "@context": "https://schema.org",
+  "@type": "ClothingStore",
+  "name": "{{business_name}}",
+  "telephone": "{{phone}}",
+  "email": "{{email}}",
+  "address": {
+    "@type": "PostalAddress",
+    "addressLocality": "{{city}}",
+    "addressCountry": "ZA"
+  }
+}
+```
+
+---
+
+## Quality Standards
+
+### Layout Consistency Rules
+1. **Grid System**: Use Bootstrap 5 12-column grid exclusively
+2. **Section Spacing**: Consistent `py-5` (padding-y: 3rem) for all sections
+3. **Container Width**: `.container` max-width 1140px for content
+4. **Heading Hierarchy**: H1 (hero only) → H2 (section titles) → H3 (card titles) → H4 (subtitles)
+5. **Font Sizes**: H1: 3rem, H2: 2.25rem, H3: 1.5rem, Body: 1rem
+
+### Accessibility Requirements
+- All images must have `alt` attributes (descriptive text)
+- Color contrast ratio minimum 4.5:1 for body text
+- Focus states visible for all interactive elements
+- Skip-to-content link at top of page
+- ARIA labels on icons and buttons without text
+- Form inputs must have associated `<label>` elements
+
+### Performance Standards
+- Critical CSS inlined in `<head>` for above-the-fold content
+- Images lazy-loaded with `loading="lazy"` attribute
+- External scripts loaded with `defer` or `async`
+- Total page weight target: <500KB (excluding images)
+- First Contentful Paint target: <2 seconds
+
+### Brand Consistency
+- Primary color must use CSS variable `var(--primary)`
+- Mtronika attribution in footer: "Designed by Mtronika"
+- WhatsApp button: green (#25D366), fixed bottom-right, 60px diameter
+- Logo placement: top-left in navbar, centered in footer
