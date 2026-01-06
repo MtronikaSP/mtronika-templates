@@ -1,0 +1,751 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "content": "Blesta universal webhook/API\n\nURL : https://mtronika_n8n:aC1lZDI1NTE5AAAAIEErDH2h18@omo.mtronika.co.za/webhook/web-design-order\n\nHTTP: Code :200\n\nUSR: mtronika_n8n",
+        "height": 256
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -336,
+        -1040
+      ],
+      "typeVersion": 1,
+      "id": "05f787d9-3053-453f-b263-1b917c7b57a6",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "web-design-order",
+        "authentication": "basicAuth",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -320,
+        -464
+      ],
+      "id": "0986f398-75c5-4041-a0b9-1ffc5ff320ef",
+      "name": "Webhook - Blesta",
+      "webhookId": "web-design-order",
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "BNNxQ3D3pGct2nXU",
+          "name": "Universal Blesta Module -Web vDesign"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "url": "https://jojo.mtronika.co.za/api/contacts/getList.json",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "client_id",
+              "value": "={{ $('Webhook - Blesta').item.json.body['_other[client_id]'] }}"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "BLESTA-API-USER",
+              "value": "n8n_connect"
+            },
+            {
+              "name": "BLESTA-API-KEY",
+              "value": "80f64038d25aa9caa32a0e2f45706181"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -96,
+        -464
+      ],
+      "id": "225a8e9d-03ab-49d9-bffd-11bab79e5079",
+      "name": "Get Contact List",
+      "retryOnFail": true,
+      "waitBetweenTries": 500,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "url": "https://jojo.mtronika.co.za/api/contacts/getNumbers.json",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "contact_id",
+              "value": "={{ $('Get Contact List').item.json.response[0].id }}"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "BLESTA-API-USER",
+              "value": "n8n_connect"
+            },
+            {
+              "name": "BLESTA-API-KEY",
+              "value": "80f64038d25aa9caa32a0e2f45706181"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        112,
+        -464
+      ],
+      "id": "ba8b334f-182a-4ccb-8f4f-3fc420e620d5",
+      "name": "Get Contact Details",
+      "retryOnFail": true,
+      "waitBetweenTries": 500,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// WF-WD-01: Normalize Data (Simplified - No API Call Needed)\n\n// 1. Get Webhook Data\nconst webhookData = $('Webhook - Blesta').item.json.body;\n\n// 2. Get Blesta API Data (Client Profile only)\nconst profileList = $('Get Contact List').item.json.response;\nconst profile = (profileList && profileList.length > 0) ? profileList[0] : {};\nconst numbersList = $('Get Contact Details').item.json.response;\n\n// 3. Robust Phone Handling\nfunction formatPhoneForWhatsApp(phone) {\n  if (!phone || phone === 'no_number_found') return null;\n  phone = phone.replace(/[\\s\\-\\(\\)]/g, ''); \n  if (phone.startsWith('+27')) return phone.substring(1);\n  if (phone.startsWith('27')) return phone;\n  if (phone.startsWith('0')) return '27' + phone.substring(1);\n  return null; \n}\n\n// 4. Phone Number Logic\nlet rawPhone = \"no_number_found\";\nif (Array.isArray(numbersList) && numbersList.length > 0) {\n    const mobileObj = numbersList.find(n => n.type === 'mobile');\n    rawPhone = mobileObj ? mobileObj.number : numbersList[0].number;\n}\nconst clientPhone = formatPhoneForWhatsApp(rawPhone) || rawPhone;\nconst whatsappReady = formatPhoneForWhatsApp(rawPhone) !== null;\n\n// 5. SLA & Due Date Logic (DIRECT FROM WEBHOOK)\n// We grab the name directly from the webhook payload\nconst packageName = webhookData['_package[name]'] || 'vbronze';\nconst packageNameLower = packageName.toLowerCase();\n\nlet tier = 'vbronze'; // Default\nif (packageNameLower.includes('platinum')) {\n    tier = 'vplatinum';\n} else if (packageNameLower.includes('gold')) {\n    tier = 'vgold';\n} else if (packageNameLower.includes('silver')) {\n    tier = 'vsilver';\n}\n\nconst slaMap = { 'vbronze': 48, 'vsilver': 72, 'vgold': 192, 'vplatinum': 504 };\nconst hoursToAdd = slaMap[tier] || 48;\nconst now = new Date();\nconst dueDate = new Date(now.getTime() + (hoursToAdd * 60 * 60 * 1000));\n\n// 6. Unique Project ID\nconst projectId = `WD-${now.getFullYear()}-${Date.now().toString(36).toUpperCase()}`;\n\n// 7. Output Construction\nconst projectData = {\n  project_id: projectId,\n  client: {\n    first_name: profile.first_name || \"Valued\",\n    last_name: profile.last_name || \"Client\",\n    business_name: webhookData.business_name || profile.company || \"Unknown Business\",\n    email: profile.email || \"projects@mtronika.co.za\",\n    phone: clientPhone,\n    phone_whatsapp_ready: whatsappReady,\n    id: webhookData['_other[client_id]'],\n    city: webhookData.city || profile.city\n  },\n  package: tier, // Auto-detected\n  intent: {\n    description: webhookData.business_intent,\n    industry: webhookData.industry_sector,\n    urgency: webhookData.urgency\n  },\n  domain: {\n    name: webhookData.domain_name,\n    status: webhookData.domain_status\n  },\n  requirements: {\n    pages: webhookData.pages_needed, \n    branding: {\n        colour: webhookData.brand_colour,\n        logo: webhookData.logo_status\n    }\n  },\n  meta: {\n    source: \"Blesta Webhook Direct\",\n    received_at: now.toISOString(),\n    sla_hours: hoursToAdd,\n    due_date: dueDate.toISOString(),\n    raw_package_name: packageName \n  }\n};\n\nreturn { json: projectData };"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        320,
+        -464
+      ],
+      "id": "fe0c79e1-c019-45ef-bf74-59ffa5710777",
+      "name": "Normalize Data"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are the Intake Agent for Mtronika Web Design Department.\nYour goal is to convert a raw client order into a professional Scope of Work (SOW) and detect any risks.\n\n### 1. CONTEXT\n- We serve South African SMEs (township businesses, spaza shops, mechanics, schools).\n- We have 4 strict packages.\n- We must detect if a client asks for features NOT included in their package (Upsell Opportunity).\n\n### 2. PACKAGE RULES (Reference)\n- vBronze (R389/pm): Max 4 pages, 48h delivery. NO payments, NO chat, NO custom galleries.\n- vSilver (R489/pm): Max 7 pages, 72h delivery. Includes Chat + Gallery. NO payments.\n- vGold (R789/pm): Max 12 pages, 8 days delivery. Includes Payments + Automation.\n- vPlatinum+ (R1,499/pm): Max 15 pages. Includes SEO + Multi-location.\n\n### 3. INPUT DATA\n{{ JSON.stringify($json) }}\n\n### 4. YOUR TASKS\n1. **Analyze Scope:** Compare 'intent' and 'requirements' against the selected 'package'.\n2. **Detect Risks:**\n   - Does the client want payments on vBronze? (Risk: Scope Creep)\n   - Is the timeline \"ASAP\" but they chose vPlatinum? (Risk: Unrealistic Expectation)\n   - Is the content source \"Client\" but they have no logo? (Risk: Delay)\n3. **Draft SOW (Markdown):** Write a professional document including:\n   - **Project Overview:** What are we building?\n   - **Deliverables:** Specific pages and features.\n   - **Timeline:** Delivery deadline based on package rules.\n   - **Client Responsibilities:** What must they provide?\n   - **Out of Scope:** Explicitly state what is NOT included (based on risks).\n\n### 5. OUTPUT FORMAT\nYou must respond with ONLY a valid JSON object. No conversational text.\n{\n  \"project_id\": \"extracted from input\",\n  \"sow_markdown\": \"# Scope of Work...\",\n  \"risk_flags\": [\n    \"Risk 1: Client requested payments but selected vBronze.\",\n    \"Risk 2: Timeline is too short for this tier.\"\n  ],\n  \"upsell_opportunity\": \"True/False - should we suggest upgrading?\"\n}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        688,
+        -464
+      ],
+      "id": "6156cb92-b86f-4023-aee2-e58025aa8a55",
+      "name": "Intake Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "claude-3-5-haiku-20241022",
+          "mode": "list",
+          "cachedResultName": "Claude Haiku 3.5"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        640,
+        -240
+      ],
+      "id": "63a27292-cc45-4b29-bdc1-9e1d016fc76d",
+      "name": "Claude Haiku 3.5",
+      "credentials": {
+        "anthropicApi": {
+          "id": "InJWeoiedPixcg1A",
+          "name": "Anthropic account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "table": {
+          "__rl": true,
+          "value": "projects",
+          "mode": "list",
+          "cachedResultName": "projects"
+        },
+        "dataMode": "defineBelow",
+        "valuesToSend": {
+          "values": [
+            {
+              "column": "project_ref",
+              "value": "={{ $('Normalize Data').item.json.project_id }}"
+            },
+            {
+              "column": "client_name",
+              "value": "={{ $('Normalize Data').item.json.client.business_name }}"
+            },
+            {
+              "column": "client_email",
+              "value": "={{ $('Normalize Data').item.json.client.email }}"
+            },
+            {
+              "column": "client_phone",
+              "value": "={{ $('Normalize Data').item.json.client.phone }}"
+            },
+            {
+              "column": "package_tier",
+              "value": "={{ $('Normalize Data').item.json.package }}"
+            },
+            {
+              "column": "industry_sector",
+              "value": "={{ $('Normalize Data').item.json.intent.industry }}"
+            },
+            {
+              "column": "business_intent",
+              "value": "={{ $('Normalize Data').item.json.intent.description }}"
+            },
+            {
+              "column": "status",
+              "value": "Intake"
+            },
+            {
+              "column": "sow_draft",
+              "value": "={{ JSON.parse($('Intake Agent').item.json.output).sow_markdown }}"
+            },
+            {
+              "column": "risk_flags",
+              "value": "={{ JSON.parse($('Intake Agent').item.json.output).risk_flags.join(\", \") }}"
+            },
+            {
+              "column": "due_date",
+              "value": "={{ $('Normalize Data').item.json.meta.due_date.slice(0, 19).replace('T', ' ') }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.5,
+      "position": [
+        1008,
+        -464
+      ],
+      "id": "fb7ecdcf-a741-4592-a47d-7bf0b8950ba4",
+      "name": "MySQL - Insert Project",
+      "credentials": {
+        "mySql": {
+          "id": "d6FdnZlnAEJ1AtZJ",
+          "name": "MySQL account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"status\": \"received\",\n  \"project_id\": \"{{ $('Normalize Data').item.json.project_id }}\",\n  \"message\": \"Order received successfully\"\n}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1248,
+        -464
+      ],
+      "id": "3abac19a-3b25-4d87-81a2-8879ff001afc",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "fromEmail": "projects@mtronika.co.za",
+        "toEmail": "website-orders@mtronika.co.za",
+        "subject": "=🚀 New Web Design Order: {{ $('Normalize Data').item.json.client.business_name }}",
+        "html": "=<!DOCTYPE html>\n<html>\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>New Intake Order</title>\n    <style>\n        /* Reset & Base Styles */\n        body, table, td, p, a, li, blockquote { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }\n        body { margin: 0; padding: 0; font-family: Arial, sans-serif; line-height: 1.6; color: #333333; background-color: #f4f4f4; }\n        \n        /* Layout */\n        .email-wrapper { width: 100%; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f4f4f4; }\n        \n        /* Logo */\n        .logo-container { text-align: center; padding: 20px 0; }\n        .logo-container img { max-width: 180px; width: 100%; height: auto; display: inline-block; }\n        \n        /* Header - Web Design Gradient (Red to Orange) */\n        .header {\n            background: linear-gradient(135deg, #ff0000, #ff6600);\n            color: white;\n            padding: 25px 20px;\n            text-align: center;\n            border-radius: 8px 8px 0 0;\n        }\n        .header h1 { margin: 0; font-size: 24px; font-weight: bold; }\n        .header p { margin: 10px 0 0 0; font-size: 16px; opacity: 0.9; }\n        \n        /* Content Body */\n        .content { background: #ffffff; padding: 30px; border-radius: 0 0 8px 8px; }\n        \n        /* Sections & Typography */\n        h3 { color: #ff0000; border-bottom: 2px solid #ff0000; padding-bottom: 8px; margin-top: 0; font-size: 18px; }\n        \n        /* Highlight Boxes */\n        .highlight-box { background: #f9f9f9; padding: 20px; border-radius: 8px; border-left: 4px solid #ff0000; margin: 20px 0; }\n        .highlight-box.orange { border-left-color: #ff6600; background-color: #fff8f0; }\n        \n        /* Info Rows */\n        .info-row { display: flex; margin-bottom: 8px; border-bottom: 1px solid #eeeeee; padding-bottom: 8px; }\n        .info-row:last-child { border-bottom: none; }\n        .info-label { font-weight: bold; color: #555555; min-width: 120px; display: inline-block; }\n        .info-value { color: #333333; }\n        \n        /* CTA Button */\n        .cta-container { text-align: center; margin: 30px 0; }\n        .cta-button {\n            display: inline-block;\n            background: linear-gradient(135deg, #ff0000, #ff6600);\n            color: white !important;\n            padding: 16px 32px;\n            border-radius: 50px;\n            text-decoration: none;\n            font-weight: bold;\n            font-size: 16px;\n            box-shadow: 0 4px 15px rgba(255, 0, 0, 0.3);\n        }\n        .cta-button:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255, 0, 0, 0.4); }\n        \n        /* Footer */\n        .footer { text-align: center; padding: 20px; color: #777777; font-size: 12px; }\n        .footer a { color: #ff0000; text-decoration: none; }\n        \n        /* Mobile */\n        @media only screen and (max-width: 480px) {\n            .email-wrapper { padding: 10px; }\n            .content { padding: 20px; }\n            .info-label { display: block; margin-bottom: 2px; }\n            .cta-button { display: block; width: auto; }\n        }\n    </style>\n</head>\n<body>\n\n<div class=\"email-wrapper\">\n    \n    <div class=\"logo-container\">\n        <img src=\"https://mtronika.co.za/assets/images/icon.png\" alt=\"Mtronika - Joy in Every Click\">\n    </div>\n\n    <div class=\"header\">\n        <h1>🚀 New Order Received</h1>\n        <p>{{ $('Normalize Data').item.json.client.business_name }}</p>\n    </div>\n\n    <div class=\"content\">\n        \n        <div class=\"highlight-box\">\n            <h3>📦 Order Details</h3>\n            <div class=\"info-row\">\n                <span class=\"info-label\">Package:</span>\n                <span class=\"info-value\">{{ $('Normalize Data').item.json.package }}</span>\n            </div>\n            <div class=\"info-row\">\n                <span class=\"info-label\">Industry:</span>\n                <span class=\"info-value\">{{ $('Normalize Data').item.json.intent.industry }}</span>\n            </div>\n            <div class=\"info-row\">\n                <span class=\"info-label\">Due Date:</span>\n                <span class=\"info-value\">{{ $('Normalize Data').item.json.meta.due_date }} <small style=\"color:#777;\">({{ $('Normalize Data').item.json.meta.sla_hours }}h SLA)</small></span>\n            </div>\n            <div class=\"info-row\">\n                <span class=\"info-label\">Status:</span>\n                <span class=\"info-value\" style=\"color: #28a745; font-weight: bold;\">✅ Intake Complete</span>\n            </div>\n        </div>\n\n        <div class=\"highlight-box orange\">\n            <h3 style=\"color: #ff6600; border-color: #ff6600;\">🤖 AI Risk Assessment</h3>\n            <p style=\"margin: 0; font-size: 14px;\">\n                <strong>Analysis:</strong><br>\n                {{ JSON.parse($('Intake Agent').item.json.output).risk_flags.join(\", \") }}\n            </p>\n        </div>\n\n        <div class=\"cta-container\">\n            <a href=\"https://omo.mtronika.co.za/webhook/approve-scope?ref={{ $('Normalize Data').item.json.project_id }}\" class=\"cta-button\">\n                ✅ APPROVE & START SCOPING\n            </a>\n            <p style=\"font-size: 13px; color: #999; margin-top: 15px;\">Click to initiate AI Architecture Phase</p>\n        </div>\n\n    </div>\n\n    <div class=\"footer\">\n        <p>\n            <strong>Ref:</strong> {{ $('Normalize Data').item.json.project_id }} &nbsp;|&nbsp; \n            <a href=\"https://server.mtronika.co.za/phpMyAdmin\">Open Database</a>\n        </p>\n        <p>© 2026 Mtronika • Krugersdorp, South Africa</p>\n        <p style=\"opacity: 0.7; font-size: 11px;\">Automated by Mtronika Intake Agent v3.0</p>\n    </div>\n\n</div>\n\n</body>\n</html>",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        1248,
+        -256
+      ],
+      "id": "066f08c4-52fd-47ad-a3a7-be9c9b6801a8",
+      "name": "Send Email - Admin Notification",
+      "webhookId": "63e10829-14eb-4191-9dfd-3740411963da",
+      "credentials": {
+        "smtp": {
+          "id": "TvYLDVjPK9MEHOk9",
+          "name": "SMTP account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## WF-WD-01: Intake Engine\n\n**Workflow Purpose:**\n1. Receive Blesta orders via webhook\n2. Fetch client data from Blesta API\n3. Generate AI-powered SOW with risk analysis\n4. Save to MySQL database\n5. Send admin notification email\n\n**Triggers:** WF-WD-02 (Scoping) when admin clicks 'Approve'",
+        "height": 280,
+        "width": 350,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        0,
+        -832
+      ],
+      "typeVersion": 1,
+      "id": "af134123-9d20-4a21-a4c5-c6d91fbf44de",
+      "name": "Sticky Note - Overview"
+    },
+    {
+      "parameters": {
+        "content": "## Credentials to Configure\n\n1. **httpBasicAuth** - Blesta webhook auth\n2. **BLESTA-API-KEY** - Replace in HTTP nodes\n3. **anthropicApi** - Claude API key\n4. **mySql** - Database connection\n5. **smtp** - Email sending",
+        "height": 232,
+        "width": 300,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        400,
+        -832
+      ],
+      "typeVersion": 1,
+      "id": "690aa23b-f647-44a1-bd05-7540b4bfd0fe",
+      "name": "Sticky Note - Credentials"
+    },
+    {
+      "parameters": {
+        "jsCode": "// WF-WD-01: CRITICAL DATA CHECK\n// The critique says: \"Don't process empty data.\"\n\nconst data = $('Normalize Data').item.json;\nconst client = data.client;\n\n// Define \"Mission Critical\" fields\nconst missingFields = [];\n\n// Check Name (Must not be the fallback \"Valued Client\")\nif (!client.first_name || client.first_name === 'Valued') {\n    missingFields.push('Client First Name');\n}\n\n// Check Email (Must not be the fallback default)\nif (!client.email || client.email === 'projects@mtronika.co.za') {\n    missingFields.push('Client Email');\n}\n\n// Check ID\nif (!client.id) {\n    missingFields.push('Client ID (Blesta)');\n}\n\n// THE HARD STOP\nif (missingFields.length > 0) {\n    // This throws an error that stops the workflow instantly\n    throw new Error(`⛔ CRITICAL FAILURE: Missing Data Lineage for [${missingFields.join(', ')}]. Blesta API call may have failed.`);\n}\n\nreturn $input.all();"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        480,
+        -464
+      ],
+      "id": "7933e6c4-ef94-4f08-ae1e-5fa0c9bf90a9",
+      "name": "GUARD: Data Integrity"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        -208
+      ],
+      "id": "a961dcca-3cd7-498e-b4d0-c64d2e5a4d49",
+      "name": "Error Trigger",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "phoneNumberId": "911618885374326",
+        "recipientPhoneNumber": "+27785310450",
+        "textBody": "=🚨 Intake Failed! Blesta API dropped data. Order #{{$json.body.service_id}} needs manual check.",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1.1,
+      "position": [
+        224,
+        -208
+      ],
+      "id": "0a85d2ed-ba86-4d2c-86e2-b15411035402",
+      "name": "Send message",
+      "webhookId": "388d0352-a246-4536-9432-571dcd573942",
+      "credentials": {
+        "whatsAppApi": {
+          "id": "yYwdv31XNhj0JHzv",
+          "name": "WhatsApp Cloud API - 27 68 608 8321"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fromEmail": "projects@mtronika.co.za",
+        "toEmail": "website-orders@mtronika.co.za",
+        "subject": "=🚨 Workflow Crash: {{$json.execution.workflow.name}}",
+        "html": "=<h3>🚨 Critical System Failure</h3>\n<p><strong>Workflow:</strong> {{$json.execution.workflow.name}}</p>\n<p><strong>Error Message:</strong> {{$json.execution.error.message}}</p>\n<p><strong>Time:</strong> {{$now}}</p>\n<p><a href=\"{{$json.execution.url}}\">View Execution Log</a></p>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        208,
+        0
+      ],
+      "id": "23630f3c-01bf-4875-8751-d893222e26c7",
+      "name": "Email - Alert Admin",
+      "webhookId": "37331269-c1ba-426a-ae0c-540dddf2c3be",
+      "credentials": {
+        "smtp": {
+          "id": "TvYLDVjPK9MEHOk9",
+          "name": "SMTP account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Prepare Domain Order for Blesta\n// Fire-and-forget: Blesta handles OpenSRS registration\n\nconst data = $('Normalize Data').item.json;\nconst domainStatus = data.domain.status; // 'existing', 'need_new', 'transfer'\nconst domainName = data.domain.name;\nconst clientId = data.client.id;\n\n// Only create order if client needs new domain or transfer\nif (domainStatus === 'need_new' || domainStatus === 'transfer') {\n  return {\n    json: {\n      should_order: true,\n      client_id: clientId,\n      pricing_id: '2140', // OpenSRS .co.za pricing ID - UPDATE THIS\n      domain: domainName,\n      action: domainStatus === 'transfer' ? 'transfer' : 'register',\n      project_id: data.project_id\n    }\n  };\n}\n\n// Skip if client already has domain\nreturn { json: { should_order: false, domain: domainName, reason: 'Client has existing domain' } };"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1488,
+        -64
+      ],
+      "id": "prepare-domain-order",
+      "name": "Prepare Domain Order"
+    },
+    {
+      "parameters": {
+        "fromEmail": "projects@mtronika.co.za",
+        "toEmail": "={{ $('Normalize Data').item.json.client.email }}",
+        "subject": "=🌐 Register Your Domain - {{ $('Prepare Domain Order').item.json.domain }}",
+        "html": "=<!DOCTYPE html>\n<html>\n<head><meta charset=\"UTF-8\"><title>Domain Registration</title></head>\n<body style=\"margin: 0; padding: 0; background-color: #f4f4f4; font-family: Arial, sans-serif;\">\n<div style=\"max-width: 600px; margin: 20px auto; background: white; border-radius: 8px; overflow: hidden;\">\n    <div style=\"background: linear-gradient(135deg, #3b82f6, #2563eb); padding: 25px; text-align: center;\">\n        <h1 style=\"color: white; margin: 0;\">🌐 Secure Your Domain</h1>\n    </div>\n    <div style=\"padding: 30px;\">\n        <p>Hi {{ $('Normalize Data').item.json.client.first_name }},</p>\n        <p>To complete your website setup, please register your domain:</p>\n        <div style=\"background: #f0f9ff; padding: 20px; border-radius: 8px; text-align: center; margin: 20px 0;\">\n            <h2 style=\"color: #2563eb; margin: 0;\">{{ $('Prepare Domain Order').item.json.domain }}</h2>\n            <p style=\"margin: 10px 0; color: #64748b;\">Action: {{ $('Prepare Domain Order').item.json.action }}</p>\n        </div>\n        <div style=\"text-align: center; margin: 30px 0;\">\n            <a href=\"https://nimzone.mtronika.co.za/order/config/preconfig/domain-registration\" style=\"display: inline-block; background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; padding: 16px 32px; border-radius: 50px; text-decoration: none; font-weight: bold;\">Register Domain Now</a>\n        </div>\n        <p style=\"color: #64748b; font-size: 14px;\">Once registered, we'll connect it to your new website.</p>\n        <p>Best regards,<br><strong>Mtronika Team</strong></p>\n    </div>\n</div>\n</body>\n</html>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        1712,
+        -160
+      ],
+      "id": "email-client-domain",
+      "name": "Email - Client Domain Link",
+      "credentials": {
+        "smtp": {
+          "id": "TvYLDVjPK9MEHOk9",
+          "name": "SMTP account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fromEmail": "projects@mtronika.co.za",
+        "toEmail": "website-orders@mtronika.co.za",
+        "subject": "=🌐 Domain Action Required: {{ $('Prepare Domain Order').item.json.domain }}",
+        "html": "=<h2>Domain Registration/Transfer Needed</h2><p><strong>Project:</strong> {{ $('Prepare Domain Order').item.json.project_id }}</p><p><strong>Domain:</strong> {{ $('Prepare Domain Order').item.json.domain }}</p><p><strong>Action:</strong> {{ $('Prepare Domain Order').item.json.action }}</p><p><strong>Client:</strong> {{ $('Normalize Data').item.json.client.email }}</p><hr><p>Client has been emailed the registration link. Follow up if not completed within 24 hours.</p><p><a href=\"https://nimzone.mtronika.co.za/order/config/preconfig/domain-registration\">Domain Registration Form</a></p>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        1712,
+        32
+      ],
+      "id": "email-admin-domain",
+      "name": "Email - Admin Domain Alert",
+      "credentials": {
+        "smtp": {
+          "id": "TvYLDVjPK9MEHOk9",
+          "name": "SMTP account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook - Blesta": {
+      "main": [
+        [
+          {
+            "node": "Get Contact List",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Contact List": {
+      "main": [
+        [
+          {
+            "node": "Get Contact Details",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Contact Details": {
+      "main": [
+        [
+          {
+            "node": "Normalize Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Data": {
+      "main": [
+        [
+          {
+            "node": "GUARD: Data Integrity",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Intake Agent": {
+      "main": [
+        [
+          {
+            "node": "MySQL - Insert Project",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Claude Haiku 3.5": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Intake Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MySQL - Insert Project": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send Email - Admin Notification",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Prepare Domain Order",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Domain Order": {
+      "main": [
+        [
+          {
+            "node": "Email - Client Domain Link",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Email - Admin Domain Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GUARD: Data Integrity": {
+      "main": [
+        [
+          {
+            "node": "Intake Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Error Trigger": {
+      "main": [
+        [
+          {
+            "node": "Send message",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Email - Alert Admin",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {
+    "Webhook - Blesta": [
+      {
+        "headers": {
+          "host": "omo.mtronika.co.za",
+          "content-length": "20635",
+          "accept": "*/*",
+          "authorization": "Basic bXRyb25pa2FfbjhuOmFDMWxaREkxTlRFNUFBQUFJRUVyREgyaDE4",
+          "content-type": "application/x-www-form-urlencoded",
+          "via": "2.0 Caddy",
+          "x-forwarded-for": "138.199.213.96",
+          "x-forwarded-host": "omo.mtronika.co.za",
+          "x-forwarded-proto": "https",
+          "accept-encoding": "gzip"
+        },
+        "params": {},
+        "query": {},
+        "body": {
+          "business_name": "Krugersdorp Construction Co.",
+          "business_intent": "We are a local building company. I need a site to show my past projects to get more contracts. People ask for photos of my work and I have nowhere to send them.",
+          "urgency": "standard",
+          "competitor_examples": "",
+          "popia_consent[0]": "agree",
+          "industry_sector": "construction",
+          "city": "Krugersdorp",
+          "domain_status": "existing",
+          "domain_name": "krugersdorp-construction.co.za",
+          "pages_needed[0]": "home",
+          "pages_needed[1]": "about",
+          "pages_needed[2]": "services",
+          "pages_needed[3]": "contact",
+          "pages_needed[4]": "gallery",
+          "pages_needed[5]": "pricing",
+          "pages_needed[6]": "booking",
+          "pages_needed[7]": "team",
+          "pages_needed[8]": "faq",
+          "pages_needed[9]": "blog",
+          "logo_status": "have",
+          "brand_colour": "orange",
+          "_package[id]": "432",
+          "_package[id_format]": "{num}",
+          "_package[id_value]": "407",
+          "_package[id_code]": "407",
+          "_package[module_id]": "4",
+          "_package[name]": "vPlatinum+ — Enterprise",
+          "_package[module_row]": "25",
+          "_package[module_group_client]": "0",
+          "_package[taxable]": "1",
+          "_package[single_term]": "0",
+          "_package[status]": "active",
+          "_package[hidden]": "0",
+          "_package[company_id]": "1",
+          "_package[upgrades_use_renewal]": "1",
+          "_package[manual_activation]": "0",
+          "_package[override_price]": "0",
+          "_package[email_content][0][lang]": "en_us",
+          "_package[email_content][0][html]": "",
+          "_package[email_content][0][text]": "",
+          "_package[pricing][0][id]": "2090",
+          "_package[pricing][0][pricing_id]": "2132",
+          "_package[pricing][0][package_id]": "432",
+          "_package[pricing][0][term]": "1",
+          "_package[pricing][0][period]": "month",
+          "_package[pricing][0][price]": "1499.0000",
+          "_package[pricing][0][price_renews]": "1499.0000",
+          "_package[pricing][0][setup_fee]": "0.0000",
+          "_package[pricing][0][cancel_fee]": "999.0000",
+          "_package[pricing][0][currency]": "ZAR",
+          "_package[pricing][0][precision]": "2",
+          "_package[pricing][0][in_use]": "0",
+          "_package[pricing][0][default]": "0",
+          "_package[groups][0][id]": "53",
+          "_package[groups][0][type]": "standard",
+          "_package[groups][0][company_id]": "1",
+          "_package[groups][0][allow_upgrades]": "1",
+          "_package[groups][0][names][0][lang]": "en_us",
+          "_package[groups][0][names][0][name]": "Professional - Website vDesign",
+          "_package[groups][0][descriptions][0][lang]": "en_us",
+          "_package[groups][0][descriptions][0][description]": "Get a Smart\r\nWebsite vDesign\r\nfrom R389/month\r\n- Mobile Responsive SEO Ready Maintenance\r\n\r\nGet a professional smart website, website repair, and ongoing maintenance — combined with proven marketing strategies to grow your brand. Plus, get a AI ChatBot trained on your docs to engage customers instantly. ",
+          "_package[groups][0][name]": "Professional - Website vDesign",
+          "_package[groups][0][description]": "Get a Smart\r\nWebsite vDesign\r\nfrom R389/month\r\n- Mobile Responsive SEO Ready Maintenance\r\n\r\nGet a professional smart website, website repair, and ongoing maintenance — combined with proven marketing strategies to grow your brand. Plus, get a AI ChatBot trained on your docs to engage customers instantly. ",
+          "_package[names][0][lang]": "en_us",
+          "_package[names][0][name]": "vPlatinum+ — Enterprise",
+          "_package[descriptions][0][lang]": "en_us",
+          "_package[descriptions][0][html]": "<div class=\"raw-html-embed\"><div class=\"package-details-blesta theme-platinum\">\r\n    <div class=\"pkg-header\">\r\n        <div class=\"pkg-icon\"><i class=\"fas fa-gem\"></i></div>\r\n        <div class=\"pkg-title\">\r\n        \r\n            <p>Enterprise Web Design</p>\r\n        </div>\r\n    </div>\r\n    <div class=\"pkg-features\">\r\n        <div class=\"pkg-feature\"><i class=\"fas fa-check\"></i><span>Free Hosting &amp; Email</span></div>\r\n        <div class=\"pkg-feature\"><i class=\"fas fa-check\"></i><span>24 Hour Monthly Maintenance</span></div>\r\n        <div class=\"pkg-feature\"><i class=\"fas fa-check\"></i><span>Up to 15 Stunning Pages</span></div>\r\n        <div class=\"pkg-feature\"><i class=\"fas fa-check\"></i><span>SEO-Enabled</span></div>\r\n        <div class=\"pkg-feature\"><i class=\"fas fa-check\"></i><span>Website Redesign Included</span></div>\r\n        <div class=\"pkg-feature\"><i class=\"fas fa-check\"></i><span>Website ChatBot</span></div>\r\n        <div class=\"pkg-feature\"><i class=\"fas fa-check\"></i><span>Payment Gateway Integration</span></div>\r\n        <div class=\"pkg-feature\"><i class=\"fas fa-check\"></i><span>AI-powered automation</span></div>\r\n        <div class=\"pkg-feature\"><i class=\"fas fa-check\"></i><span>10 Customized Images</span></div>\r\n    </div>\r\n    <div class=\"pkg-pricing\">\r\n        \r\n        <div class=\"pkg-setup\">\r\n            <span>Setup</span>\r\n            <span style=\"color: #16a34a;\">FREE</span>\r\n        </div>\r\n        <div style=\"font-size: 0.75rem; color: #475569; text-align: center; margin-top: 8px; font-weight: 700;\">\r\n            Save R500/month! Ultimate Solution\r\n        </div>\r\n    </div>\r\n    \r\n</div>\r\n\r\n<style>\r\n/* --- BLESTA PACKAGE CARD CSS --- */\r\n\r\n/* Main Container */\r\n.package-details-blesta {\r\n    border-radius: 12px;\r\n    background: #ffffff;\r\n    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);\r\n    overflow: hidden;\r\n    font-family: 'Unbounded', sans-serif;\r\n    max-width: 450px;\r\n    margin: 0 auto;\r\n    border: 1px solid #e5e7eb;\r\n    transition: transform 0.2s;\r\n}\r\n\r\n.package-details-blesta:hover {\r\n    transform: translateY(-2px);\r\n    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);\r\n}\r\n\r\n/* Header */\r\n.pkg-header {\r\n    padding: 20px;\r\n    display: flex;\r\n    align-items: center;\r\n    gap: 15px;\r\n    border-bottom: 1px solid rgba(0,0,0,0.05);\r\n}\r\n\r\n.pkg-icon {\r\n    width: 48px;\r\n    height: 48px;\r\n    border-radius: 10px;\r\n    display: flex;\r\n    align-items: center;\r\n    justify-content: center;\r\n    font-size: 20px;\r\n    color: white;\r\n}\r\n\r\n.pkg-title h3 {\r\n    margin: 0;\r\n    font-size: 1.25rem;\r\n    font-weight: 700;\r\n    color: #1f2937;\r\n}\r\n\r\n.pkg-title p {\r\n    margin: 4px 0 0 0;\r\n    font-size: 0.875rem;\r\n    color: #6b7280;\r\n}\r\n\r\n/* Features List */\r\n.pkg-features {\r\n    padding: 20px;\r\n    display: flex;\r\n    flex-direction: column;\r\n    gap: 12px;\r\n}\r\n\r\n.pkg-feature {\r\n    display: flex;\r\n    align-items: flex-start;\r\n    gap: 10px;\r\n    font-size: 0.95rem;\r\n    color: #374151;\r\n}\r\n\r\n.pkg-feature i {\r\n    margin-top: 3px;\r\n    width: 16px;\r\n    color: #16a34a;\r\n}\r\n\r\n/* Pricing Section */\r\n.pkg-pricing {\r\n    margin: 0 20px 20px 20px;\r\n    padding: 15px;\r\n    border-radius: 8px;\r\n    background: #f9fafb;\r\n    border: 1px solid #e5e7eb;\r\n}\r\n\r\n.pkg-price {\r\n    display: flex;\r\n    justify-content: space-between;\r\n    align-items: baseline;\r\n    margin-bottom: 8px;\r\n}\r\n\r\n.pkg-price-label {\r\n    font-size: 0.875rem;\r\n    font-weight: 600;\r\n    text-transform: uppercase;\r\n    color: #6b7280;\r\n}\r\n\r\n.pkg-price-value {\r\n    font-size: 1.5rem;\r\n    font-weight: 800;\r\n    color: #111827;\r\n}\r\n\r\n.pkg-price-value small {\r\n    font-size: 0.875rem;\r\n    font-weight: 500;\r\n    color: #6b7280;\r\n}\r\n\r\n.pkg-setup {\r\n    display: flex;\r\n    justify-content: space-between;\r\n    font-size: 0.875rem;\r\n    color: #4b5563;\r\n    padding-top: 8px;\r\n    border-top: 1px dashed #d1d5db;\r\n}\r\n\r\n/* CTA Button */\r\n.pkg-cta {\r\n    padding: 0 20px 20px 20px;\r\n}\r\n\r\n.pkg-btn {\r\n    display: flex;\r\n    align-items: center;\r\n    justify-content: center;\r\n    gap: 8px;\r\n    width: 100%;\r\n    padding: 12px;\r\n    border-radius: 6px;\r\n    font-weight: 600;\r\n    text-align: center;\r\n    cursor: pointer;\r\n    text-decoration: none;\r\n    border: none;\r\n}\r\n\r\n/* THEMES */\r\n.theme-starter .pkg-icon { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); }\r\n.theme-starter .pkg-btn { background: #d97706; color: white; }\r\n\r\n.theme-growth .pkg-icon { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); }\r\n.theme-growth .pkg-btn { background: #2563eb; color: white; }\r\n\r\n.theme-scale .pkg-icon { background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); }\r\n.theme-scale .pkg-btn { background: #7c3aed; color: white; }\r\n\r\n/* Custom Theme for Platinum */\r\n.theme-platinum .pkg-icon { background: linear-gradient(135deg, #64748b 0%, #0f172a 100%); }\r\n.theme-platinum .pkg-btn { background: #0f172a; color: white; }\r\n</style></div>",
+          "_package[descriptions][0][text]": "",
+          "_package[description]": "",
+          "_package[description_html]": "<div class=\"raw-html-embed\"><div class=\"package-details-blesta theme-platinum\">\r\n    <div class=\"pkg-header\">\r\n        <div class=\"pkg-icon\"><i class=\"fas fa-gem\"></i></div>\r\n        <div class=\"pkg-title\">\r\n        \r\n            <p>Enterprise Web Design</p>\r\n        </div>\r\n    </div>\r\n    <div class=\"pkg-features\">\r\n        <div class=\"pkg-feature\"><i class=\"fas fa-check\"></i><span>Free Hosting &amp; Email</span></div>\r\n        <div class=\"pkg-feature\"><i class=\"fas fa-check\"></i><span>24 Hour Monthly Maintenance</span></div>\r\n        <div class=\"pkg-feature\"><i class=\"fas fa-check\"></i><span>Up to 15 Stunning Pages</span></div>\r\n        <div class=\"pkg-feature\"><i class=\"fas fa-check\"></i><span>SEO-Enabled</span></div>\r\n        <div class=\"pkg-feature\"><i class=\"fas fa-check\"></i><span>Website Redesign Included</span></div>\r\n        <div class=\"pkg-feature\"><i class=\"fas fa-check\"></i><span>Website ChatBot</span></div>\r\n        <div class=\"pkg-feature\"><i class=\"fas fa-check\"></i><span>Payment Gateway Integration</span></div>\r\n        <div class=\"pkg-feature\"><i class=\"fas fa-check\"></i><span>AI-powered automation</span></div>\r\n        <div class=\"pkg-feature\"><i class=\"fas fa-check\"></i><span>10 Customized Images</span></div>\r\n    </div>\r\n    <div class=\"pkg-pricing\">\r\n        \r\n        <div class=\"pkg-setup\">\r\n            <span>Setup</span>\r\n            <span style=\"color: #16a34a;\">FREE</span>\r\n        </div>\r\n        <div style=\"font-size: 0.75rem; color: #475569; text-align: center; margin-top: 8px; font-weight: 700;\">\r\n            Save R500/month! Ultimate Solution\r\n        </div>\r\n    </div>\r\n    \r\n</div>\r\n\r\n<style>\r\n/* --- BLESTA PACKAGE CARD CSS --- */\r\n\r\n/* Main Container */\r\n.package-details-blesta {\r\n    border-radius: 12px;\r\n    background: #ffffff;\r\n    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);\r\n    overflow: hidden;\r\n    font-family: 'Unbounded', sans-serif;\r\n    max-width: 450px;\r\n    margin: 0 auto;\r\n    border: 1px solid #e5e7eb;\r\n    transition: transform 0.2s;\r\n}\r\n\r\n.package-details-blesta:hover {\r\n    transform: translateY(-2px);\r\n    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);\r\n}\r\n\r\n/* Header */\r\n.pkg-header {\r\n    padding: 20px;\r\n    display: flex;\r\n    align-items: center;\r\n    gap: 15px;\r\n    border-bottom: 1px solid rgba(0,0,0,0.05);\r\n}\r\n\r\n.pkg-icon {\r\n    width: 48px;\r\n    height: 48px;\r\n    border-radius: 10px;\r\n    display: flex;\r\n    align-items: center;\r\n    justify-content: center;\r\n    font-size: 20px;\r\n    color: white;\r\n}\r\n\r\n.pkg-title h3 {\r\n    margin: 0;\r\n    font-size: 1.25rem;\r\n    font-weight: 700;\r\n    color: #1f2937;\r\n}\r\n\r\n.pkg-title p {\r\n    margin: 4px 0 0 0;\r\n    font-size: 0.875rem;\r\n    color: #6b7280;\r\n}\r\n\r\n/* Features List */\r\n.pkg-features {\r\n    padding: 20px;\r\n    display: flex;\r\n    flex-direction: column;\r\n    gap: 12px;\r\n}\r\n\r\n.pkg-feature {\r\n    display: flex;\r\n    align-items: flex-start;\r\n    gap: 10px;\r\n    font-size: 0.95rem;\r\n    color: #374151;\r\n}\r\n\r\n.pkg-feature i {\r\n    margin-top: 3px;\r\n    width: 16px;\r\n    color: #16a34a;\r\n}\r\n\r\n/* Pricing Section */\r\n.pkg-pricing {\r\n    margin: 0 20px 20px 20px;\r\n    padding: 15px;\r\n    border-radius: 8px;\r\n    background: #f9fafb;\r\n    border: 1px solid #e5e7eb;\r\n}\r\n\r\n.pkg-price {\r\n    display: flex;\r\n    justify-content: space-between;\r\n    align-items: baseline;\r\n    margin-bottom: 8px;\r\n}\r\n\r\n.pkg-price-label {\r\n    font-size: 0.875rem;\r\n    font-weight: 600;\r\n    text-transform: uppercase;\r\n    color: #6b7280;\r\n}\r\n\r\n.pkg-price-value {\r\n    font-size: 1.5rem;\r\n    font-weight: 800;\r\n    color: #111827;\r\n}\r\n\r\n.pkg-price-value small {\r\n    font-size: 0.875rem;\r\n    font-weight: 500;\r\n    color: #6b7280;\r\n}\r\n\r\n.pkg-setup {\r\n    display: flex;\r\n    justify-content: space-between;\r\n    font-size: 0.875rem;\r\n    color: #4b5563;\r\n    padding-top: 8px;\r\n    border-top: 1px dashed #d1d5db;\r\n}\r\n\r\n/* CTA Button */\r\n.pkg-cta {\r\n    padding: 0 20px 20px 20px;\r\n}\r\n\r\n.pkg-btn {\r\n    display: flex;\r\n    align-items: center;\r\n    justify-content: center;\r\n    gap: 8px;\r\n    width: 100%;\r\n    padding: 12px;\r\n    border-radius: 6px;\r\n    font-weight: 600;\r\n    text-align: center;\r\n    cursor: pointer;\r\n    text-decoration: none;\r\n    border: none;\r\n}\r\n\r\n/* THEMES */\r\n.theme-starter .pkg-icon { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); }\r\n.theme-starter .pkg-btn { background: #d97706; color: white; }\r\n\r\n.theme-growth .pkg-icon { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); }\r\n.theme-growth .pkg-btn { background: #2563eb; color: white; }\r\n\r\n.theme-scale .pkg-icon { background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); }\r\n.theme-scale .pkg-btn { background: #7c3aed; color: white; }\r\n\r\n/* Custom Theme for Platinum */\r\n.theme-platinum .pkg-icon { background: linear-gradient(135deg, #64748b 0%, #0f172a 100%); }\r\n.theme-platinum .pkg-btn { background: #0f172a; color: white; }\r\n</style></div>",
+          "business_name_name": "Krugersdorp Construction Co.",
+          "business_intent_name": "We are a local building company. I need a site to show my past projects to get more contracts. People ask for photos of my work and I have nowhere to send them.",
+          "urgency_name": "Standard (per package SLA)",
+          "competitor_examples_name": "",
+          "popia_consent_values[0][name]": "I agree",
+          "popia_consent_values[0][value]": "agree",
+          "industry_sector_name": "Construction",
+          "city_name": "Krugersdorp",
+          "domain_status_name": "I have an existing domain",
+          "domain_name_name": "krugersdorp-construction.co.za",
+          "pages_needed_values[0][name]": "Home Page",
+          "pages_needed_values[0][value]": "home",
+          "pages_needed_values[1][name]": "About Us",
+          "pages_needed_values[1][value]": "about",
+          "pages_needed_values[2][name]": "Services",
+          "pages_needed_values[2][value]": "services",
+          "pages_needed_values[3][name]": "Contact Us",
+          "pages_needed_values[3][value]": "contact",
+          "pages_needed_values[4][name]": "Photo Gallery",
+          "pages_needed_values[4][value]": "gallery",
+          "pages_needed_values[5][name]": "Pricing / Menu",
+          "pages_needed_values[5][value]": "pricing",
+          "pages_needed_values[6][name]": "Booking / Appointment",
+          "pages_needed_values[6][value]": "booking",
+          "pages_needed_values[7][name]": "Team / Staff",
+          "pages_needed_values[7][value]": "team",
+          "pages_needed_values[8][name]": "FAQ",
+          "pages_needed_values[8][value]": "faq",
+          "pages_needed_values[9][name]": "Blog / News",
+          "pages_needed_values[9][value]": "blog",
+          "logo_status_name": "I have a logo",
+          "brand_colour_name": "Orange",
+          "_action": "service_notice_add",
+          "_other[pricing_id]": "2090",
+          "_other[status]": "active",
+          "_other[use_module]": "true",
+          "_other[module_row_id]": "25",
+          "_other[meta][business_name]": "Krugersdorp Construction Co.",
+          "_other[meta][business_intent]": "We are a local building company. I need a site to show my past projects to get more contracts. People ask for photos of my work and I have nowhere to send them.",
+          "_other[meta][urgency]": "standard",
+          "_other[meta][competitor_examples]": "",
+          "_other[meta][popia_consent][0]": "agree",
+          "_other[meta][industry_sector]": "construction",
+          "_other[meta][city]": "Krugersdorp",
+          "_other[meta][domain_status]": "existing",
+          "_other[meta][domain_name]": "krugersdorp-construction.co.za",
+          "_other[meta][pages_needed][0]": "home",
+          "_other[meta][pages_needed][1]": "about",
+          "_other[meta][pages_needed][2]": "services",
+          "_other[meta][pages_needed][3]": "contact",
+          "_other[meta][pages_needed][4]": "gallery",
+          "_other[meta][pages_needed][5]": "pricing",
+          "_other[meta][pages_needed][6]": "booking",
+          "_other[meta][pages_needed][7]": "team",
+          "_other[meta][pages_needed][8]": "faq",
+          "_other[meta][pages_needed][9]": "blog",
+          "_other[meta][logo_status]": "have",
+          "_other[meta][brand_colour]": "orange",
+          "_other[save]": "Continue",
+          "_other[package_group_id]": "53",
+          "_other[qty]": "1",
+          "_other[client_id]": "10",
+          "_other[staff_id]": "1",
+          "_other[coupon_packages][432]": "2090",
+          "_other[date_added]": "2026-01-03 15:03:51",
+          "_other[date_renews]": "2026-02-03 15:03:51"
+        },
+        "webhookUrl": "https://omo.mtronika.co.za/webhook/web-design-order",
+        "executionMode": "production"
+      }
+    ]
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "0c4e1e5325de5935e7052b5ce1c1cf23ed3ad9a4fa00e0e387f84b3088759ff5"
+  }
+}

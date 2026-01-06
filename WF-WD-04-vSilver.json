@@ -1,0 +1,823 @@
+{
+    "name": "WF-WD-04-vSilver: 7-Page Expansion",
+    "nodes": [
+        {
+            "parameters": {
+                "content": "## WF-WD-04-vSilver: 7-Page Website\n\n**Package:** vSilver (R489/month)\n**Pages:** Home, About, Services, Contact, Gallery, Testimonials, FAQ\n**Delivery:** 72 hours\n**Features:** Chat widget placeholder",
+                "height": 220,
+                "width": 320,
+                "color": 3
+            },
+            "type": "n8n-nodes-base.stickyNote",
+            "position": [
+                -600,
+                -100
+            ],
+            "typeVersion": 1,
+            "id": "sticky-vsilver",
+            "name": "Sticky Note"
+        },
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "expand-vsilver",
+                "responseMode": "responseNode",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 2.1,
+            "position": [
+                -200,
+                300
+            ],
+            "id": "webhook-vsilver",
+            "name": "Webhook - Expand vSilver",
+            "webhookId": "expand-vsilver"
+        },
+        {
+            "parameters": {
+                "operation": "executeQuery",
+                "query": "SELECT p.*, pp.page_html as home_html FROM projects p LEFT JOIN project_pages pp ON p.project_ref = pp.project_ref AND pp.page_slug = 'index' WHERE p.project_ref = '{{ $json.body.project_ref }}' LIMIT 1;",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.mySql",
+            "typeVersion": 2.5,
+            "position": [
+                40,
+                300
+            ],
+            "id": "mysql-get-project",
+            "name": "MySQL - Get Project",
+            "credentials": {
+                "mySql": {
+                    "id": "d6FdnZlnAEJ1AtZJ",
+                    "name": "MySQL account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "jsCode": "// vSilver: 6 additional pages\nconst project = $input.first().json;\nconst homeHtml = project.home_html || project.processed_html || '';\nconst headerMatch = homeHtml.match(/<!-- Topbar Start -->[\\s\\S]*?<!-- Navbar End -->/i);\nconst footerMatch = homeHtml.match(/<!-- Footer Start -->[\\s\\S]*?<!-- Footer End -->/i);\nconst headMatch = homeHtml.match(/<head>[\\s\\S]*?<\\/head>/i);\n\nreturn {\n  json: {\n    project,\n    header: headerMatch ? headerMatch[0] : '',\n    footer: footerMatch ? footerMatch[0] : '',\n    headContent: headMatch ? headMatch[0] : '',\n    brandColour: project.brand_colour || '#FD5D14',\n    clientName: project.client_name,\n    industrySector: project.industry_sector,\n    businessIntent: project.business_intent,\n    phone: project.client_phone,\n    email: project.client_email,\n    pages: [\n      { name: 'About', slug: 'about', order: 2 },\n      { name: 'Services', slug: 'services', order: 3 },\n      { name: 'Contact', slug: 'contact', order: 4 },\n      { name: 'Gallery', slug: 'gallery', order: 5 },\n      { name: 'Testimonials', slug: 'testimonials', order: 6 },\n      { name: 'FAQ', slug: 'faq', order: 7 }\n    ]\n  }\n};"
+            },
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                280,
+                300
+            ],
+            "id": "prepare-vsilver",
+            "name": "Prepare vSilver Pages"
+        },
+        {
+            "parameters": {
+                "jsCode": "const d = $input.first().json;\nconst prompt = `Create About page for ${d.clientName} (${d.industrySector}). Brand: ${d.brandColour}. Include company story, mission, values. Use header/footer from home. Return HTML in \\`\\`\\`html blocks.`;\nreturn { json: { prompt, ...d, currentPage: d.pages[0] } };"
+            },
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                520,
+                100
+            ],
+            "id": "prompt-about",
+            "name": "Prompt - About"
+        },
+        {
+            "parameters": {
+                "promptType": "define",
+                "text": "={{ $json.prompt }}",
+                "options": {}
+            },
+            "type": "@n8n/n8n-nodes-langchain.agent",
+            "typeVersion": 3.1,
+            "position": [
+                760,
+                100
+            ],
+            "id": "ai-about",
+            "name": "AI - About"
+        },
+        {
+            "parameters": {
+                "jsCode": "const ai = $input.first().json; const page = $('Prompt - About').item.json.currentPage; const proj = $('Prompt - About').item.json.project; let html = ai.output ? (ai.output.match(/```html([\\s\\S]*?)```/) || [null, ai.output])[1].trim() : ''; return { json: { project_ref: proj.project_ref, page_name: page.name, page_slug: page.slug, page_order: page.order, page_html: html, is_generated: true } };"
+            },
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                1000,
+                100
+            ],
+            "id": "parse-about",
+            "name": "Parse - About"
+        },
+        {
+            "parameters": {
+                "operation": "executeQuery",
+                "query": "INSERT INTO project_pages (project_ref, page_name, page_slug, page_html, page_order, is_generated) VALUES ('{{ $json.project_ref }}', '{{ $json.page_name }}', '{{ $json.page_slug }}', {{ JSON.stringify($json.page_html) }}, {{ $json.page_order }}, 1) ON DUPLICATE KEY UPDATE page_html = VALUES(page_html);",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.mySql",
+            "typeVersion": 2.5,
+            "position": [
+                1240,
+                100
+            ],
+            "id": "save-about",
+            "name": "Save - About",
+            "credentials": {
+                "mySql": {
+                    "id": "d6FdnZlnAEJ1AtZJ",
+                    "name": "MySQL account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "jsCode": "const d = $('Prepare vSilver Pages').item.json; const prompt = `Create Services page for ${d.clientName}. 4-6 service cards. Brand: ${d.brandColour}. Return HTML.`; return { json: { prompt, ...d, currentPage: d.pages[1] } };"
+            },
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                520,
+                250
+            ],
+            "id": "prompt-services",
+            "name": "Prompt - Services"
+        },
+        {
+            "parameters": {
+                "promptType": "define",
+                "text": "={{ $json.prompt }}",
+                "options": {}
+            },
+            "type": "@n8n/n8n-nodes-langchain.agent",
+            "typeVersion": 3.1,
+            "position": [
+                760,
+                250
+            ],
+            "id": "ai-services",
+            "name": "AI - Services"
+        },
+        {
+            "parameters": {
+                "jsCode": "const ai = $input.first().json; const page = $('Prompt - Services').item.json.currentPage; const proj = $('Prompt - Services').item.json.project; let html = ai.output ? (ai.output.match(/```html([\\s\\S]*?)```/) || [null, ai.output])[1].trim() : ''; return { json: { project_ref: proj.project_ref, page_name: page.name, page_slug: page.slug, page_order: page.order, page_html: html, is_generated: true } };"
+            },
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                1000,
+                250
+            ],
+            "id": "parse-services",
+            "name": "Parse - Services"
+        },
+        {
+            "parameters": {
+                "operation": "executeQuery",
+                "query": "INSERT INTO project_pages (project_ref, page_name, page_slug, page_html, page_order, is_generated) VALUES ('{{ $json.project_ref }}', '{{ $json.page_name }}', '{{ $json.page_slug }}', {{ JSON.stringify($json.page_html) }}, {{ $json.page_order }}, 1) ON DUPLICATE KEY UPDATE page_html = VALUES(page_html);",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.mySql",
+            "typeVersion": 2.5,
+            "position": [
+                1240,
+                250
+            ],
+            "id": "save-services",
+            "name": "Save - Services",
+            "credentials": {
+                "mySql": {
+                    "id": "d6FdnZlnAEJ1AtZJ",
+                    "name": "MySQL account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "jsCode": "const d = $('Prepare vSilver Pages').item.json; const prompt = `Create Contact page for ${d.clientName}. Phone: ${d.phone}, Email: ${d.email}. Include form, map, WhatsApp. Return HTML.`; return { json: { prompt, ...d, currentPage: d.pages[2] } };"
+            },
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                520,
+                400
+            ],
+            "id": "prompt-contact",
+            "name": "Prompt - Contact"
+        },
+        {
+            "parameters": {
+                "promptType": "define",
+                "text": "={{ $json.prompt }}",
+                "options": {}
+            },
+            "type": "@n8n/n8n-nodes-langchain.agent",
+            "typeVersion": 3.1,
+            "position": [
+                760,
+                400
+            ],
+            "id": "ai-contact",
+            "name": "AI - Contact"
+        },
+        {
+            "parameters": {
+                "jsCode": "const ai = $input.first().json; const page = $('Prompt - Contact').item.json.currentPage; const proj = $('Prompt - Contact').item.json.project; let html = ai.output ? (ai.output.match(/```html([\\s\\S]*?)```/) || [null, ai.output])[1].trim() : ''; return { json: { project_ref: proj.project_ref, page_name: page.name, page_slug: page.slug, page_order: page.order, page_html: html, is_generated: true } };"
+            },
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                1000,
+                400
+            ],
+            "id": "parse-contact",
+            "name": "Parse - Contact"
+        },
+        {
+            "parameters": {
+                "operation": "executeQuery",
+                "query": "INSERT INTO project_pages (project_ref, page_name, page_slug, page_html, page_order, is_generated) VALUES ('{{ $json.project_ref }}', '{{ $json.page_name }}', '{{ $json.page_slug }}', {{ JSON.stringify($json.page_html) }}, {{ $json.page_order }}, 1) ON DUPLICATE KEY UPDATE page_html = VALUES(page_html);",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.mySql",
+            "typeVersion": 2.5,
+            "position": [
+                1240,
+                400
+            ],
+            "id": "save-contact",
+            "name": "Save - Contact",
+            "credentials": {
+                "mySql": {
+                    "id": "d6FdnZlnAEJ1AtZJ",
+                    "name": "MySQL account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "jsCode": "const d = $('Prepare vSilver Pages').item.json; const prompt = `Create Gallery/Portfolio page for ${d.clientName}. 12 images with lightbox. Use picsum.photos. Return HTML.`; return { json: { prompt, ...d, currentPage: d.pages[3] } };"
+            },
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                520,
+                550
+            ],
+            "id": "prompt-gallery",
+            "name": "Prompt - Gallery"
+        },
+        {
+            "parameters": {
+                "promptType": "define",
+                "text": "={{ $json.prompt }}",
+                "options": {}
+            },
+            "type": "@n8n/n8n-nodes-langchain.agent",
+            "typeVersion": 3.1,
+            "position": [
+                760,
+                550
+            ],
+            "id": "ai-gallery",
+            "name": "AI - Gallery"
+        },
+        {
+            "parameters": {
+                "jsCode": "const ai = $input.first().json; const page = $('Prompt - Gallery').item.json.currentPage; const proj = $('Prompt - Gallery').item.json.project; let html = ai.output ? (ai.output.match(/```html([\\s\\S]*?)```/) || [null, ai.output])[1].trim() : ''; return { json: { project_ref: proj.project_ref, page_name: page.name, page_slug: page.slug, page_order: page.order, page_html: html, is_generated: true } };"
+            },
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                1000,
+                550
+            ],
+            "id": "parse-gallery",
+            "name": "Parse - Gallery"
+        },
+        {
+            "parameters": {
+                "operation": "executeQuery",
+                "query": "INSERT INTO project_pages (project_ref, page_name, page_slug, page_html, page_order, is_generated) VALUES ('{{ $json.project_ref }}', '{{ $json.page_name }}', '{{ $json.page_slug }}', {{ JSON.stringify($json.page_html) }}, {{ $json.page_order }}, 1) ON DUPLICATE KEY UPDATE page_html = VALUES(page_html);",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.mySql",
+            "typeVersion": 2.5,
+            "position": [
+                1240,
+                550
+            ],
+            "id": "save-gallery",
+            "name": "Save - Gallery",
+            "credentials": {
+                "mySql": {
+                    "id": "d6FdnZlnAEJ1AtZJ",
+                    "name": "MySQL account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "jsCode": "const d = $('Prepare vSilver Pages').item.json; const prompt = `Create Testimonials page for ${d.clientName}. 6 client reviews with photos. Return HTML.`; return { json: { prompt, ...d, currentPage: d.pages[4] } };"
+            },
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                520,
+                700
+            ],
+            "id": "prompt-testimonials",
+            "name": "Prompt - Testimonials"
+        },
+        {
+            "parameters": {
+                "promptType": "define",
+                "text": "={{ $json.prompt }}",
+                "options": {}
+            },
+            "type": "@n8n/n8n-nodes-langchain.agent",
+            "typeVersion": 3.1,
+            "position": [
+                760,
+                700
+            ],
+            "id": "ai-testimonials",
+            "name": "AI - Testimonials"
+        },
+        {
+            "parameters": {
+                "jsCode": "const ai = $input.first().json; const page = $('Prompt - Testimonials').item.json.currentPage; const proj = $('Prompt - Testimonials').item.json.project; let html = ai.output ? (ai.output.match(/```html([\\s\\S]*?)```/) || [null, ai.output])[1].trim() : ''; return { json: { project_ref: proj.project_ref, page_name: page.name, page_slug: page.slug, page_order: page.order, page_html: html, is_generated: true } };"
+            },
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                1000,
+                700
+            ],
+            "id": "parse-testimonials",
+            "name": "Parse - Testimonials"
+        },
+        {
+            "parameters": {
+                "operation": "executeQuery",
+                "query": "INSERT INTO project_pages (project_ref, page_name, page_slug, page_html, page_order, is_generated) VALUES ('{{ $json.project_ref }}', '{{ $json.page_name }}', '{{ $json.page_slug }}', {{ JSON.stringify($json.page_html) }}, {{ $json.page_order }}, 1) ON DUPLICATE KEY UPDATE page_html = VALUES(page_html);",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.mySql",
+            "typeVersion": 2.5,
+            "position": [
+                1240,
+                700
+            ],
+            "id": "save-testimonials",
+            "name": "Save - Testimonials",
+            "credentials": {
+                "mySql": {
+                    "id": "d6FdnZlnAEJ1AtZJ",
+                    "name": "MySQL account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "jsCode": "const d = $('Prepare vSilver Pages').item.json; const prompt = `Create FAQ page for ${d.clientName} (${d.industrySector}). 8-10 common questions with accordion. Return HTML.`; return { json: { prompt, ...d, currentPage: d.pages[5] } };"
+            },
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                520,
+                850
+            ],
+            "id": "prompt-faq",
+            "name": "Prompt - FAQ"
+        },
+        {
+            "parameters": {
+                "promptType": "define",
+                "text": "={{ $json.prompt }}",
+                "options": {}
+            },
+            "type": "@n8n/n8n-nodes-langchain.agent",
+            "typeVersion": 3.1,
+            "position": [
+                760,
+                850
+            ],
+            "id": "ai-faq",
+            "name": "AI - FAQ"
+        },
+        {
+            "parameters": {
+                "jsCode": "const ai = $input.first().json; const page = $('Prompt - FAQ').item.json.currentPage; const proj = $('Prompt - FAQ').item.json.project; let html = ai.output ? (ai.output.match(/```html([\\s\\S]*?)```/) || [null, ai.output])[1].trim() : ''; return { json: { project_ref: proj.project_ref, page_name: page.name, page_slug: page.slug, page_order: page.order, page_html: html, is_generated: true } };"
+            },
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                1000,
+                850
+            ],
+            "id": "parse-faq",
+            "name": "Parse - FAQ"
+        },
+        {
+            "parameters": {
+                "operation": "executeQuery",
+                "query": "INSERT INTO project_pages (project_ref, page_name, page_slug, page_html, page_order, is_generated) VALUES ('{{ $json.project_ref }}', '{{ $json.page_name }}', '{{ $json.page_slug }}', {{ JSON.stringify($json.page_html) }}, {{ $json.page_order }}, 1) ON DUPLICATE KEY UPDATE page_html = VALUES(page_html);",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.mySql",
+            "typeVersion": 2.5,
+            "position": [
+                1240,
+                850
+            ],
+            "id": "save-faq",
+            "name": "Save - FAQ",
+            "credentials": {
+                "mySql": {
+                    "id": "d6FdnZlnAEJ1AtZJ",
+                    "name": "MySQL account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "operation": "executeQuery",
+                "query": "UPDATE projects SET pages_generated = 7, deployment_status = 'Pages_Complete' WHERE project_ref = '{{ $('MySQL - Get Project').item.json.project_ref }}';",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.mySql",
+            "typeVersion": 2.5,
+            "position": [
+                1480,
+                500
+            ],
+            "id": "update-count",
+            "name": "Update Count",
+            "credentials": {
+                "mySql": {
+                    "id": "d6FdnZlnAEJ1AtZJ",
+                    "name": "MySQL account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "respondWith": "json",
+                "responseBody": "={ \"status\": \"vsilver_complete\", \"pages_generated\": 7 }",
+                "options": {
+                    "responseCode": 200
+                }
+            },
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1.5,
+            "position": [
+                1720,
+                500
+            ],
+            "id": "respond",
+            "name": "Respond"
+        },
+        {
+            "parameters": {
+                "modelName": "models/gemini-2.0-flash",
+                "options": {}
+            },
+            "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+            "typeVersion": 1,
+            "position": [
+                760,
+                1050
+            ],
+            "id": "gemini",
+            "name": "Gemini",
+            "credentials": {
+                "googlePalmApi": {
+                    "id": "ZLZ470lIBf79ePht",
+                    "name": "Google Gemini(PaLM) Api account"
+                }
+            }
+        }
+    ],
+    "connections": {
+        "Webhook - Expand vSilver": {
+            "main": [
+                [
+                    {
+                        "node": "MySQL - Get Project",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "MySQL - Get Project": {
+            "main": [
+                [
+                    {
+                        "node": "Prepare vSilver Pages",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Prepare vSilver Pages": {
+            "main": [
+                [
+                    {
+                        "node": "Prompt - About",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "Prompt - Services",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "Prompt - Contact",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "Prompt - Gallery",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "Prompt - Testimonials",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "Prompt - FAQ",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Prompt - About": {
+            "main": [
+                [
+                    {
+                        "node": "AI - About",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "AI - About": {
+            "main": [
+                [
+                    {
+                        "node": "Parse - About",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Parse - About": {
+            "main": [
+                [
+                    {
+                        "node": "Save - About",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Prompt - Services": {
+            "main": [
+                [
+                    {
+                        "node": "AI - Services",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "AI - Services": {
+            "main": [
+                [
+                    {
+                        "node": "Parse - Services",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Parse - Services": {
+            "main": [
+                [
+                    {
+                        "node": "Save - Services",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Prompt - Contact": {
+            "main": [
+                [
+                    {
+                        "node": "AI - Contact",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "AI - Contact": {
+            "main": [
+                [
+                    {
+                        "node": "Parse - Contact",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Parse - Contact": {
+            "main": [
+                [
+                    {
+                        "node": "Save - Contact",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Prompt - Gallery": {
+            "main": [
+                [
+                    {
+                        "node": "AI - Gallery",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "AI - Gallery": {
+            "main": [
+                [
+                    {
+                        "node": "Parse - Gallery",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Parse - Gallery": {
+            "main": [
+                [
+                    {
+                        "node": "Save - Gallery",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Prompt - Testimonials": {
+            "main": [
+                [
+                    {
+                        "node": "AI - Testimonials",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "AI - Testimonials": {
+            "main": [
+                [
+                    {
+                        "node": "Parse - Testimonials",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Parse - Testimonials": {
+            "main": [
+                [
+                    {
+                        "node": "Save - Testimonials",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Prompt - FAQ": {
+            "main": [
+                [
+                    {
+                        "node": "AI - FAQ",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "AI - FAQ": {
+            "main": [
+                [
+                    {
+                        "node": "Parse - FAQ",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Parse - FAQ": {
+            "main": [
+                [
+                    {
+                        "node": "Save - FAQ",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Save - FAQ": {
+            "main": [
+                [
+                    {
+                        "node": "Update Count",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Update Count": {
+            "main": [
+                [
+                    {
+                        "node": "Respond",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Gemini": {
+            "ai_languageModel": [
+                [
+                    {
+                        "node": "AI - About",
+                        "type": "ai_languageModel",
+                        "index": 0
+                    },
+                    {
+                        "node": "AI - Services",
+                        "type": "ai_languageModel",
+                        "index": 0
+                    },
+                    {
+                        "node": "AI - Contact",
+                        "type": "ai_languageModel",
+                        "index": 0
+                    },
+                    {
+                        "node": "AI - Gallery",
+                        "type": "ai_languageModel",
+                        "index": 0
+                    },
+                    {
+                        "node": "AI - Testimonials",
+                        "type": "ai_languageModel",
+                        "index": 0
+                    },
+                    {
+                        "node": "AI - FAQ",
+                        "type": "ai_languageModel",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "pinData": {},
+    "meta": {
+        "templateCredsSetupCompleted": true,
+        "instanceId": "mtronika-vsilver"
+    }
+}

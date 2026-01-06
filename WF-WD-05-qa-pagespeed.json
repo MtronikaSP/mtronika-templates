@@ -1,0 +1,517 @@
+{
+    "name": "WF-WD-05: QA & Quality Assurance",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "start-qa",
+                "authentication": "headerAuth",
+                "responseMode": "responseNode",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 2.1,
+            "position": [
+                -600,
+                300
+            ],
+            "id": "webhook-start-qa",
+            "name": "Webhook - Start QA",
+            "webhookId": "start-qa",
+            "credentials": {
+                "httpHeaderAuth": {
+                    "id": "YOUR_HEADER_AUTH_CREDENTIAL_ID",
+                    "name": "n8n API Key Header"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "operation": "select",
+                "query": "SELECT * FROM projects WHERE project_ref = :ref",
+                "options": {
+                    "queryBatching": "independently",
+                    "queryReplacement": "={{ { ref: $json.body?.project_ref || $json.query?.ref } }}"
+                }
+            },
+            "type": "n8n-nodes-base.mySql",
+            "typeVersion": 2.5,
+            "position": [
+                -360,
+                300
+            ],
+            "id": "mysql-get-project",
+            "name": "MySQL - Get Project",
+            "credentials": {
+                "mySql": {
+                    "id": "YOUR_MYSQL_CREDENTIAL_ID",
+                    "name": "MySQL account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "options": {
+                        "caseSensitive": true,
+                        "leftValue": ""
+                    },
+                    "conditions": [
+                        {
+                            "leftValue": "={{ $json.hosting_status }}",
+                            "rightValue": "Provisioned",
+                            "operator": {
+                                "type": "string",
+                                "operation": "equals"
+                            }
+                        }
+                    ],
+                    "combinator": "and"
+                },
+                "options": {}
+            },
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 2.2,
+            "position": [
+                -120,
+                300
+            ],
+            "id": "if-hosting-ready",
+            "name": "IF Hosting Ready?"
+        },
+        {
+            "parameters": {
+                "respondWith": "json",
+                "responseBody": "{\n  \"status\": \"error\",\n  \"message\": \"Hosting not yet provisioned. Cannot run QA.\"\n}",
+                "options": {
+                    "responseCode": 400
+                }
+            },
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1.5,
+            "position": [
+                -120,
+                500
+            ],
+            "id": "respond-error",
+            "name": "Respond - Hosting Not Ready"
+        },
+        {
+            "parameters": {
+                "url": "https://pagespeedonline.googleapis.com/pagespeedonline/v5/runPagespeed",
+                "sendQuery": true,
+                "queryParameters": {
+                    "parameters": [
+                        {
+                            "name": "url",
+                            "value": "=https://{{ $('MySQL - Get Project').item.json.domain_name || $('MySQL - Get Project').item.json.client_name.toLowerCase().replace(/[^a-z0-9]/g, '') + '.mtronika.co.za' }}"
+                        },
+                        {
+                            "name": "category",
+                            "value": "performance"
+                        },
+                        {
+                            "name": "category",
+                            "value": "accessibility"
+                        },
+                        {
+                            "name": "category",
+                            "value": "seo"
+                        },
+                        {
+                            "name": "strategy",
+                            "value": "mobile"
+                        }
+                    ]
+                },
+                "options": {
+                    "timeout": 120000,
+                    "retry": {
+                        "maxTries": 2,
+                        "waitBetweenTries": 10000
+                    }
+                }
+            },
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.3,
+            "position": [
+                120,
+                300
+            ],
+            "id": "pagespeed-audit",
+            "name": "PageSpeed Insights - Audit"
+        },
+        {
+            "parameters": {
+                "jsCode": "// WF-WD-05: Parse QA Scores from PageSpeed Insights\n\nconst response = $json.lighthouseResult;\nconst categories = response.categories;\nconst project = $('MySQL - Get Project').item.json;\n\n// Extract scores (0-100)\nconst scores = {\n  performance: Math.round((categories.performance?.score || 0) * 100),\n  accessibility: Math.round((categories.accessibility?.score || 0) * 100),\n  seo: Math.round((categories.seo?.score || 0) * 100)\n};\n\n// Minimum thresholds for pass\nconst thresholds = { \n  performance: 50, \n  accessibility: 70, \n  seo: 70 \n};\n\n// Check if all scores pass\nconst passed = scores.performance >= thresholds.performance &&\n               scores.accessibility >= thresholds.accessibility &&\n               scores.seo >= thresholds.seo;\n\n// Build issues list\nconst issues = [];\nif (scores.performance < thresholds.performance) \n  issues.push(`Performance: ${scores.performance}% (min ${thresholds.performance}%)`);\nif (scores.accessibility < thresholds.accessibility) \n  issues.push(`Accessibility: ${scores.accessibility}% (min ${thresholds.accessibility}%)`);\nif (scores.seo < thresholds.seo) \n  issues.push(`SEO: ${scores.seo}% (min ${thresholds.seo}%)`);\n\n// Get key recommendations if failed\nlet recommendations = [];\nif (!passed && response.audits) {\n  const failedAudits = Object.values(response.audits)\n    .filter(a => a.score !== null && a.score < 0.9)\n    .slice(0, 5)\n    .map(a => a.title);\n  recommendations = failedAudits;\n}\n\nreturn {\n  json: {\n    project_ref: project.project_ref,\n    client_name: project.client_name,\n    domain: $json.id,\n    qa_scores: scores,\n    qa_passed: passed,\n    qa_issues: issues,\n    qa_recommendations: recommendations,\n    qa_completed_at: new Date().toISOString(),\n    final_url: response.finalUrl\n  }\n};"
+            },
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                360,
+                300
+            ],
+            "id": "parse-scores",
+            "name": "Parse QA Scores"
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "options": {
+                        "caseSensitive": true,
+                        "leftValue": ""
+                    },
+                    "conditions": [
+                        {
+                            "leftValue": "={{ $json.qa_passed }}",
+                            "rightValue": true,
+                            "operator": {
+                                "type": "boolean",
+                                "operation": "equals"
+                            }
+                        }
+                    ],
+                    "combinator": "and"
+                },
+                "options": {}
+            },
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 2.2,
+            "position": [
+                600,
+                300
+            ],
+            "id": "if-qa-passed",
+            "name": "IF QA Passed?"
+        },
+        {
+            "parameters": {
+                "operation": "update",
+                "table": {
+                    "__rl": true,
+                    "value": "projects",
+                    "mode": "list",
+                    "cachedResultName": "projects"
+                },
+                "dataMode": "defineBelow",
+                "columnToMatchOn": "project_ref",
+                "valueToMatchOn": "={{ $json.project_ref }}",
+                "valuesToSend": {
+                    "values": [
+                        {
+                            "column": "qa_scores",
+                            "value": "={{ JSON.stringify($json.qa_scores) }}"
+                        },
+                        {
+                            "column": "qa_passed",
+                            "value": "=1"
+                        },
+                        {
+                            "column": "qa_completed_at",
+                            "value": "={{ $json.qa_completed_at.slice(0, 19).replace('T', ' ') }}"
+                        },
+                        {
+                            "column": "status",
+                            "value": "QA_Pass"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "type": "n8n-nodes-base.mySql",
+            "typeVersion": 2.5,
+            "position": [
+                840,
+                200
+            ],
+            "id": "mysql-update-pass",
+            "name": "MySQL - QA Passed",
+            "credentials": {
+                "mySql": {
+                    "id": "YOUR_MYSQL_CREDENTIAL_ID",
+                    "name": "MySQL account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "operation": "update",
+                "table": {
+                    "__rl": true,
+                    "value": "projects",
+                    "mode": "list",
+                    "cachedResultName": "projects"
+                },
+                "dataMode": "defineBelow",
+                "columnToMatchOn": "project_ref",
+                "valueToMatchOn": "={{ $json.project_ref }}",
+                "valuesToSend": {
+                    "values": [
+                        {
+                            "column": "qa_scores",
+                            "value": "={{ JSON.stringify($json.qa_scores) }}"
+                        },
+                        {
+                            "column": "qa_passed",
+                            "value": "=0"
+                        },
+                        {
+                            "column": "qa_completed_at",
+                            "value": "={{ $json.qa_completed_at.slice(0, 19).replace('T', ' ') }}"
+                        },
+                        {
+                            "column": "status",
+                            "value": "QA_Failed"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "type": "n8n-nodes-base.mySql",
+            "typeVersion": 2.5,
+            "position": [
+                840,
+                400
+            ],
+            "id": "mysql-update-fail",
+            "name": "MySQL - QA Failed",
+            "credentials": {
+                "mySql": {
+                    "id": "YOUR_MYSQL_CREDENTIAL_ID",
+                    "name": "MySQL account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "respondWith": "json",
+                "responseBody": "={\n  \"status\": \"qa_passed\",\n  \"project_ref\": \"{{ $('Parse QA Scores').item.json.project_ref }}\",\n  \"scores\": {{ JSON.stringify($('Parse QA Scores').item.json.qa_scores) }},\n  \"ready_for_deploy\": true\n}",
+                "options": {
+                    "responseCode": 200
+                }
+            },
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1.5,
+            "position": [
+                1080,
+                200
+            ],
+            "id": "respond-pass",
+            "name": "Respond - QA Passed"
+        },
+        {
+            "parameters": {
+                "respondWith": "json",
+                "responseBody": "={\n  \"status\": \"qa_failed\",\n  \"project_ref\": \"{{ $('Parse QA Scores').item.json.project_ref }}\",\n  \"scores\": {{ JSON.stringify($('Parse QA Scores').item.json.qa_scores) }},\n  \"issues\": {{ JSON.stringify($('Parse QA Scores').item.json.qa_issues) }},\n  \"recommendations\": {{ JSON.stringify($('Parse QA Scores').item.json.qa_recommendations) }}\n}",
+                "options": {
+                    "responseCode": 200
+                }
+            },
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1.5,
+            "position": [
+                1080,
+                400
+            ],
+            "id": "respond-fail",
+            "name": "Respond - QA Failed"
+        },
+        {
+            "parameters": {
+                "fromEmail": "qa@mtronika.co.za",
+                "toEmail": "website-orders@mtronika.co.za",
+                "subject": "=✅ QA PASSED: {{ $('Parse QA Scores').item.json.project_ref }} - Ready for Deploy!",
+                "html": "=<!DOCTYPE html>\n<html>\n<head>\n<meta charset=\"UTF-8\">\n<title>QA Passed</title>\n</head>\n<body style=\"margin: 0; padding: 0; background-color: #f4f4f4; font-family: 'Helvetica Neue', sans-serif;\">\n<div style=\"max-width: 600px; margin: 20px auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.05);\">\n\n    <div style=\"background: linear-gradient(135deg, #28a745 0%, #20c997 100%); padding: 30px; text-align: center;\">\n        <h1 style=\"color: white; margin: 0; font-size: 28px;\">✅ QA PASSED</h1>\n    </div>\n\n    <div style=\"padding: 30px; color: #333; line-height: 1.6;\">\n        <h2 style=\"color: #28a745; margin-top: 0;\">{{ $('Parse QA Scores').item.json.client_name }}</h2>\n        \n        <div style=\"background: #d4edda; padding: 20px; border-radius: 10px; margin-bottom: 25px;\">\n            <h3 style=\"margin: 0 0 15px; color: #155724;\">📊 Lighthouse Scores</h3>\n            <table style=\"width: 100%; border-collapse: collapse;\">\n                <tr>\n                    <td style=\"padding: 10px; border-bottom: 1px solid #c3e6cb;\">⚡ Performance</td>\n                    <td style=\"padding: 10px; border-bottom: 1px solid #c3e6cb; font-weight: bold; text-align: right; color: {{ $('Parse QA Scores').item.json.qa_scores.performance >= 50 ? '#28a745' : '#dc3545' }};\">{{ $('Parse QA Scores').item.json.qa_scores.performance }}%</td>\n                </tr>\n                <tr>\n                    <td style=\"padding: 10px; border-bottom: 1px solid #c3e6cb;\">♿ Accessibility</td>\n                    <td style=\"padding: 10px; border-bottom: 1px solid #c3e6cb; font-weight: bold; text-align: right; color: {{ $('Parse QA Scores').item.json.qa_scores.accessibility >= 70 ? '#28a745' : '#dc3545' }};\">{{ $('Parse QA Scores').item.json.qa_scores.accessibility }}%</td>\n                </tr>\n                <tr>\n                    <td style=\"padding: 10px;\">🔍 SEO</td>\n                    <td style=\"padding: 10px; font-weight: bold; text-align: right; color: {{ $('Parse QA Scores').item.json.qa_scores.seo >= 70 ? '#28a745' : '#dc3545' }};\">{{ $('Parse QA Scores').item.json.qa_scores.seo }}%</td>\n                </tr>\n            </table>\n        </div>\n        \n        <div style=\"text-align: center;\">\n            <a href=\"https://omo.mtronika.co.za/webhook/deploy-production?ref={{ $('Parse QA Scores').item.json.project_ref }}\" \n               style=\"background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; padding: 18px 40px; text-decoration: none; border-radius: 50px; font-weight: bold; font-size: 18px; display: inline-block;\">\n               🚀 DEPLOY TO PRODUCTION\n            </a>\n        </div>\n    </div>\n\n    <div style=\"background: #f4f4f4; padding: 15px; text-align: center; font-size: 12px; color: #888;\">\n        Project: {{ $('Parse QA Scores').item.json.project_ref }} | Automated QA by Mtronika\n    </div>\n\n</div>\n</body>\n</html>",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.emailSend",
+            "typeVersion": 2.1,
+            "position": [
+                1080,
+                60
+            ],
+            "id": "send-email-pass",
+            "name": "Send Email - QA Passed",
+            "credentials": {
+                "smtp": {
+                    "id": "YOUR_SMTP_CREDENTIAL_ID",
+                    "name": "SMTP account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "fromEmail": "qa@mtronika.co.za",
+                "toEmail": "website-orders@mtronika.co.za",
+                "subject": "=❌ QA FAILED: {{ $('Parse QA Scores').item.json.project_ref }} - Fixes Required",
+                "html": "=<!DOCTYPE html>\n<html>\n<head>\n<meta charset=\"UTF-8\">\n<title>QA Failed</title>\n</head>\n<body style=\"margin: 0; padding: 0; background-color: #f4f4f4; font-family: 'Helvetica Neue', sans-serif;\">\n<div style=\"max-width: 600px; margin: 20px auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.05);\">\n\n    <div style=\"background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); padding: 30px; text-align: center;\">\n        <h1 style=\"color: white; margin: 0; font-size: 28px;\">❌ QA FAILED</h1>\n    </div>\n\n    <div style=\"padding: 30px; color: #333; line-height: 1.6;\">\n        <h2 style=\"color: #dc3545; margin-top: 0;\">{{ $('Parse QA Scores').item.json.client_name }}</h2>\n        \n        <div style=\"background: #f8d7da; padding: 20px; border-radius: 10px; margin-bottom: 25px;\">\n            <h3 style=\"margin: 0 0 15px; color: #721c24;\">📊 Lighthouse Scores</h3>\n            <table style=\"width: 100%; border-collapse: collapse;\">\n                <tr>\n                    <td style=\"padding: 10px; border-bottom: 1px solid #f5c6cb;\">⚡ Performance</td>\n                    <td style=\"padding: 10px; border-bottom: 1px solid #f5c6cb; font-weight: bold; text-align: right; color: {{ $('Parse QA Scores').item.json.qa_scores.performance >= 50 ? '#28a745' : '#dc3545' }};\">{{ $('Parse QA Scores').item.json.qa_scores.performance }}%</td>\n                </tr>\n                <tr>\n                    <td style=\"padding: 10px; border-bottom: 1px solid #f5c6cb;\">♿ Accessibility</td>\n                    <td style=\"padding: 10px; border-bottom: 1px solid #f5c6cb; font-weight: bold; text-align: right; color: {{ $('Parse QA Scores').item.json.qa_scores.accessibility >= 70 ? '#28a745' : '#dc3545' }};\">{{ $('Parse QA Scores').item.json.qa_scores.accessibility }}%</td>\n                </tr>\n                <tr>\n                    <td style=\"padding: 10px;\">🔍 SEO</td>\n                    <td style=\"padding: 10px; font-weight: bold; text-align: right; color: {{ $('Parse QA Scores').item.json.qa_scores.seo >= 70 ? '#28a745' : '#dc3545' }};\">{{ $('Parse QA Scores').item.json.qa_scores.seo }}%</td>\n                </tr>\n            </table>\n        </div>\n        \n        <div style=\"background: #fff3cd; padding: 15px; border-radius: 8px; margin-bottom: 20px;\">\n            <h4 style=\"margin: 0 0 10px; color: #856404;\">⚠️ Issues Found:</h4>\n            <ul style=\"margin: 0; padding-left: 20px;\">\n                {{ $('Parse QA Scores').item.json.qa_issues.map(i => '<li>' + i + '</li>').join('') }}\n            </ul>\n        </div>\n        \n        <div style=\"background: #e3f2fd; padding: 15px; border-radius: 8px;\">\n            <h4 style=\"margin: 0 0 10px; color: #1565c0;\">🔧 Recommendations:</h4>\n            <ul style=\"margin: 0; padding-left: 20px;\">\n                {{ $('Parse QA Scores').item.json.qa_recommendations.map(r => '<li>' + r + '</li>').join('') }}\n            </ul>\n        </div>\n        \n        <div style=\"text-align: center; margin-top: 30px;\">\n            <a href=\"https://pagespeed.web.dev/report?url={{ encodeURIComponent($('Parse QA Scores').item.json.final_url) }}\" \n               style=\"background: #6c757d; color: white; padding: 15px 30px; text-decoration: none; border-radius: 50px; font-weight: bold; display: inline-block;\">\n               📊 View Full Report\n            </a>\n        </div>\n    </div>\n\n    <div style=\"background: #f4f4f4; padding: 15px; text-align: center; font-size: 12px; color: #888;\">\n        Project: {{ $('Parse QA Scores').item.json.project_ref }} | Fix issues and re-run QA\n    </div>\n\n</div>\n</body>\n</html>",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.emailSend",
+            "typeVersion": 2.1,
+            "position": [
+                1080,
+                540
+            ],
+            "id": "send-email-fail",
+            "name": "Send Email - QA Failed",
+            "credentials": {
+                "smtp": {
+                    "id": "YOUR_SMTP_CREDENTIAL_ID",
+                    "name": "SMTP account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "content": "## WF-WD-05: QA & Quality Assurance\n\n**Purpose:** Automated quality checks using Google PageSpeed Insights\n\n**Flow:**\n1. Check hosting is provisioned\n2. Run PageSpeed audit (mobile)\n3. Parse performance/accessibility/SEO scores\n4. Pass/Fail based on thresholds\n5. Update database + email admin\n\n**Thresholds:**\n- Performance: min 50%\n- Accessibility: min 70%\n- SEO: min 70%",
+                "height": 320,
+                "width": 350,
+                "color": 4
+            },
+            "type": "n8n-nodes-base.stickyNote",
+            "position": [
+                -600,
+                20
+            ],
+            "typeVersion": 1,
+            "id": "sticky-note-1",
+            "name": "Sticky Note - Overview"
+        },
+        {
+            "parameters": {
+                "content": "## No API Key Needed!\n\nPageSpeed Insights API is free and doesn't require authentication for basic usage.\n\nRate limit: ~25 requests per 100 seconds.",
+                "height": 140,
+                "width": 280,
+                "color": 3
+            },
+            "type": "n8n-nodes-base.stickyNote",
+            "position": [
+                -200,
+                20
+            ],
+            "typeVersion": 1,
+            "id": "sticky-note-2",
+            "name": "Sticky Note - API"
+        }
+    ],
+    "connections": {
+        "Webhook - Start QA": {
+            "main": [
+                [
+                    {
+                        "node": "MySQL - Get Project",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "MySQL - Get Project": {
+            "main": [
+                [
+                    {
+                        "node": "IF Hosting Ready?",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "IF Hosting Ready?": {
+            "main": [
+                [
+                    {
+                        "node": "PageSpeed Insights - Audit",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Respond - Hosting Not Ready",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "PageSpeed Insights - Audit": {
+            "main": [
+                [
+                    {
+                        "node": "Parse QA Scores",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Parse QA Scores": {
+            "main": [
+                [
+                    {
+                        "node": "IF QA Passed?",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "IF QA Passed?": {
+            "main": [
+                [
+                    {
+                        "node": "MySQL - QA Passed",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "MySQL - QA Failed",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "MySQL - QA Passed": {
+            "main": [
+                [
+                    {
+                        "node": "Respond - QA Passed",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "Send Email - QA Passed",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "MySQL - QA Failed": {
+            "main": [
+                [
+                    {
+                        "node": "Respond - QA Failed",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "Send Email - QA Failed",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "pinData": {},
+    "meta": {
+        "templateCredsSetupCompleted": false,
+        "instanceId": "mtronika-web-design-wf-wd-05"
+    }
+}

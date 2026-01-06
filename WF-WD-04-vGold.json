@@ -1,0 +1,326 @@
+{
+    "name": "WF-WD-04-vGold: 12-Page Expansion",
+    "nodes": [
+        {
+            "parameters": {
+                "content": "## WF-WD-04-vGold: 12-Page Website\n\n**Package:** vGold (R789/month)\n**Pages:** All vSilver + Booking, Payment, Register, Confirmation, Invoice\n**Delivery:** 8 days\n**Features:** Payment gateway, booking forms, automation",
+                "height": 240,
+                "width": 360,
+                "color": 2
+            },
+            "type": "n8n-nodes-base.stickyNote",
+            "position": [
+                -600,
+                -100
+            ],
+            "typeVersion": 1,
+            "id": "sticky-vgold",
+            "name": "Sticky Note"
+        },
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "expand-vgold",
+                "responseMode": "responseNode",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 2.1,
+            "position": [
+                -200,
+                300
+            ],
+            "id": "webhook-vgold",
+            "name": "Webhook - Expand vGold",
+            "webhookId": "expand-vgold"
+        },
+        {
+            "parameters": {
+                "operation": "executeQuery",
+                "query": "SELECT p.*, pp.page_html as home_html FROM projects p LEFT JOIN project_pages pp ON p.project_ref = pp.project_ref AND pp.page_slug = 'index' WHERE p.project_ref = '{{ $json.body.project_ref }}' LIMIT 1;",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.mySql",
+            "typeVersion": 2.5,
+            "position": [
+                40,
+                300
+            ],
+            "id": "mysql-get-project",
+            "name": "MySQL - Get Project",
+            "credentials": {
+                "mySql": {
+                    "id": "d6FdnZlnAEJ1AtZJ",
+                    "name": "MySQL account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "jsCode": "// vGold: 11 additional pages (home exists)\nconst project = $input.first().json;\nconst homeHtml = project.home_html || project.processed_html || '';\nconst headerMatch = homeHtml.match(/<!-- Topbar Start -->[\\s\\S]*?<!-- Navbar End -->/i);\nconst footerMatch = homeHtml.match(/<!-- Footer Start -->[\\s\\S]*?<!-- Footer End -->/i);\n\nreturn {\n  json: {\n    project,\n    header: headerMatch ? headerMatch[0] : '',\n    footer: footerMatch ? footerMatch[0] : '',\n    brandColour: project.brand_colour || '#FD5D14',\n    clientName: project.client_name,\n    industrySector: project.industry_sector,\n    phone: project.client_phone,\n    email: project.client_email,\n    pages: [\n      { name: 'About', slug: 'about', order: 2, desc: 'Company info' },\n      { name: 'Services', slug: 'services', order: 3, desc: 'Service listings' },\n      { name: 'Contact', slug: 'contact', order: 4, desc: 'Contact form/map' },\n      { name: 'Gallery', slug: 'gallery', order: 5, desc: 'Portfolio images' },\n      { name: 'Testimonials', slug: 'testimonials', order: 6, desc: 'Client reviews' },\n      { name: 'FAQ', slug: 'faq', order: 7, desc: 'Common questions' },\n      { name: 'Booking', slug: 'booking', order: 8, desc: 'Appointment scheduler' },\n      { name: 'Payment', slug: 'payment', order: 9, desc: 'Online payment form' },\n      { name: 'Register', slug: 'register', order: 10, desc: 'Client signup' },\n      { name: 'Confirmation', slug: 'confirmation', order: 11, desc: 'Order confirmation' },\n      { name: 'Invoice', slug: 'invoice', order: 12, desc: 'Invoice display' }\n    ]\n  }\n};"
+            },
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                280,
+                300
+            ],
+            "id": "prepare-vgold",
+            "name": "Prepare vGold Pages"
+        },
+        {
+            "parameters": {
+                "jsCode": "// Generate all page prompts in batch\nconst d = $input.first().json;\nconst pages = d.pages.map((p, i) => {\n  let prompt = `Create ${p.name} page for ${d.clientName} (${d.industrySector}). Brand: ${d.brandColour}. ${p.desc}. `;\n  if (p.slug === 'booking') prompt += 'Include date/time picker, service selector, submit button.';\n  if (p.slug === 'payment') prompt += 'Include Yoco/PayFast placeholder, amount field, pay button.';\n  if (p.slug === 'register') prompt += 'Include name, email, phone, password, confirm fields.';\n  if (p.slug === 'confirmation') prompt += 'Show order details, reference number, next steps.';\n  if (p.slug === 'invoice') prompt += 'Show invoice header, line items, total, payment status.';\n  prompt += ' Return complete HTML in ```html blocks.';\n  return { prompt, page: p, project: d.project, header: d.header, footer: d.footer };\n});\nreturn pages.map(p => ({ json: p }));"
+            },
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                520,
+                300
+            ],
+            "id": "generate-prompts",
+            "name": "Generate All Prompts"
+        },
+        {
+            "parameters": {
+                "promptType": "define",
+                "text": "={{ $json.prompt }}",
+                "options": {}
+            },
+            "type": "@n8n/n8n-nodes-langchain.agent",
+            "typeVersion": 3.1,
+            "position": [
+                760,
+                300
+            ],
+            "id": "ai-generate",
+            "name": "AI - Generate Page"
+        },
+        {
+            "parameters": {
+                "jsCode": "const ai = $input.first().json;\nconst page = $('Generate All Prompts').item.json.page;\nconst proj = $('Generate All Prompts').item.json.project;\nlet html = '';\nif (ai.output) {\n  const m = ai.output.match(/```html([\\s\\S]*?)```/);\n  html = m ? m[1].trim() : ai.output;\n}\nreturn { json: { project_ref: proj.project_ref, page_name: page.name, page_slug: page.slug, page_order: page.order, page_html: html, is_generated: true } };"
+            },
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                1000,
+                300
+            ],
+            "id": "parse-page",
+            "name": "Parse Page HTML"
+        },
+        {
+            "parameters": {
+                "operation": "executeQuery",
+                "query": "INSERT INTO project_pages (project_ref, page_name, page_slug, page_html, page_order, is_generated) VALUES ('{{ $json.project_ref }}', '{{ $json.page_name }}', '{{ $json.page_slug }}', {{ JSON.stringify($json.page_html) }}, {{ $json.page_order }}, 1) ON DUPLICATE KEY UPDATE page_html = VALUES(page_html), is_generated = 1;",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.mySql",
+            "typeVersion": 2.5,
+            "position": [
+                1240,
+                300
+            ],
+            "id": "save-page",
+            "name": "Save Page to DB",
+            "credentials": {
+                "mySql": {
+                    "id": "d6FdnZlnAEJ1AtZJ",
+                    "name": "MySQL account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "operation": "executeQuery",
+                "query": "UPDATE projects SET pages_generated = 12, deployment_status = 'Pages_Complete' WHERE project_ref = '{{ $('MySQL - Get Project').item.json.project_ref }}';",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.mySql",
+            "typeVersion": 2.5,
+            "position": [
+                1480,
+                300
+            ],
+            "id": "update-count",
+            "name": "Update Page Count",
+            "credentials": {
+                "mySql": {
+                    "id": "d6FdnZlnAEJ1AtZJ",
+                    "name": "MySQL account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "respondWith": "json",
+                "responseBody": "={\n  \"status\": \"vgold_complete\",\n  \"project_ref\": \"{{ $('MySQL - Get Project').item.json.project_ref }}\",\n  \"pages_generated\": 12,\n  \"pages\": [\"index\", \"about\", \"services\", \"contact\", \"gallery\", \"testimonials\", \"faq\", \"booking\", \"payment\", \"register\", \"confirmation\", \"invoice\"]\n}",
+                "options": {
+                    "responseCode": 200
+                }
+            },
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1.5,
+            "position": [
+                1720,
+                300
+            ],
+            "id": "respond",
+            "name": "Respond"
+        },
+        {
+            "parameters": {
+                "fromEmail": "projects@mtronika.co.za",
+                "toEmail": "website-orders@mtronika.co.za",
+                "subject": "=✅ vGold Complete: {{ $('MySQL - Get Project').item.json.project_ref }} - 12 Pages Ready",
+                "html": "=<h2>vGold Package Complete</h2><p>12 pages generated for {{ $('MySQL - Get Project').item.json.client_name }}</p><p>Pages: Home, About, Services, Contact, Gallery, Testimonials, FAQ, Booking, Payment, Register, Confirmation, Invoice</p>",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.emailSend",
+            "typeVersion": 2.1,
+            "position": [
+                1720,
+                100
+            ],
+            "id": "email-complete",
+            "name": "Email - Complete",
+            "credentials": {
+                "smtp": {
+                    "id": "TvYLDVjPK9MEHOk9",
+                    "name": "SMTP account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "modelName": "models/gemini-2.0-flash",
+                "options": {}
+            },
+            "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+            "typeVersion": 1,
+            "position": [
+                760,
+                520
+            ],
+            "id": "gemini",
+            "name": "Google Gemini",
+            "credentials": {
+                "googlePalmApi": {
+                    "id": "ZLZ470lIBf79ePht",
+                    "name": "Google Gemini(PaLM) Api account"
+                }
+            }
+        }
+    ],
+    "connections": {
+        "Webhook - Expand vGold": {
+            "main": [
+                [
+                    {
+                        "node": "MySQL - Get Project",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "MySQL - Get Project": {
+            "main": [
+                [
+                    {
+                        "node": "Prepare vGold Pages",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Prepare vGold Pages": {
+            "main": [
+                [
+                    {
+                        "node": "Generate All Prompts",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Generate All Prompts": {
+            "main": [
+                [
+                    {
+                        "node": "AI - Generate Page",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "AI - Generate Page": {
+            "main": [
+                [
+                    {
+                        "node": "Parse Page HTML",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Parse Page HTML": {
+            "main": [
+                [
+                    {
+                        "node": "Save Page to DB",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Save Page to DB": {
+            "main": [
+                [
+                    {
+                        "node": "Update Page Count",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Update Page Count": {
+            "main": [
+                [
+                    {
+                        "node": "Respond",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "Email - Complete",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Google Gemini": {
+            "ai_languageModel": [
+                [
+                    {
+                        "node": "AI - Generate Page",
+                        "type": "ai_languageModel",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "pinData": {},
+    "meta": {
+        "templateCredsSetupCompleted": true,
+        "instanceId": "mtronika-vgold"
+    }
+}

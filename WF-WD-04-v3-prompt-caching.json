@@ -1,0 +1,464 @@
+{
+    "name": "WF-WD-04-v3-prompt-caching",
+    "nodes": [
+        {
+            "parameters": {
+                "content": "## WF-WD-04-v3: Design Template with Prompt Caching\n\n**Purpose:**\n1. Generate websites using Claude API with **Prompt Caching**\n2. Reduce API costs by **75%** for repeated prompts\n3. Cache static system instructions, vary only client data\n\n**Caching Strategy:**\n- System prompt (static) = CACHED (~4K tokens)\n- Client data + Blueprint (dynamic) = NOT CACHED\n\n**Cost Savings:**\n- Without cache: ~$0.015/request\n- With cache: ~$0.00375/request\n- Savings: 75% per request\n\n**Version:** 3.0 - Prompt Caching Edition",
+                "height": 484,
+                "width": 446,
+                "color": 5
+            },
+            "type": "n8n-nodes-base.stickyNote",
+            "position": [
+                400,
+                -400
+            ],
+            "typeVersion": 1,
+            "id": "overview-note",
+            "name": "Sticky Note - Overview"
+        },
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "start-design-cached",
+                "responseMode": "responseNode",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 2.1,
+            "position": [
+                400,
+                0
+            ],
+            "id": "webhook-start",
+            "name": "Webhook - Start Design (Cached)",
+            "webhookId": "start-design-cached"
+        },
+        {
+            "parameters": {
+                "operation": "executeQuery",
+                "query": "SELECT * FROM projects WHERE project_ref = '{{ $json.body.project_ref }}' LIMIT 1;",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.mySql",
+            "typeVersion": 2.5,
+            "position": [
+                640,
+                0
+            ],
+            "id": "mysql-get-project",
+            "name": "MySQL - Get Project",
+            "credentials": {
+                "mySql": {
+                    "id": "YOUR_MYSQL_CREDENTIAL_ID",
+                    "name": "MySQL account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "jsCode": "// Build Claude API payload with PROMPT CACHING\n// This Code Node builds the complete API request\n\nconst project = $input.first().json;\n\n// STATIC SYSTEM PROMPT - This will be CACHED\n// Claude caches content marked with cache_control for 5 minutes\nconst systemPrompt = {\n  type: \"text\",\n  text: `### Role\nYou are a Senior Solution Architect for Mtronika, a web design agency in South Africa.\nYour job is to select the BEST website template variant for each client based on their industry and business intent.\n\n### Core Expertise\n- Bootstrap 5 responsive design\n- Semantic HTML5 and CSS3\n- SEO optimization for South African businesses\n- Mobile-first development\n- Understanding SME needs in Gauteng/Krugersdorp area\n\n### Template Options (25 total)\n\n**Construction (2 variants)**\n- A: \"construction/template_a_v1\" (General/Corporate)\n- B: \"construction/template_b_v1\" (Industrial/Rugged)\n\n**Education (2 variants)**\n- A: \"education/template_a_v1\" (Standard schools/training)\n- B: \"education/template_b_v1\" (Kindergarten/Preschool/Kids)\n\n**Healthcare-Medical (2 variants)**\n- A: \"healthcare-medical/template_a_v1\" (General clinic/hospital)\n- B: \"healthcare-medical/template_b_v1\" (Dental/Wellness)\n\n**Restaurant-Food (2 variants)**\n- A: \"restaurant-food/template_a_v1\" (Fine dining/general)\n- B: \"restaurant-food/template_b_v1\" (Fast food/casual)\n\n**Retail E-Commerce (3 variants)**\n- A: \"retail-e-commerce/template_a_v1\" (Grocery/Organic - 'Fruitables')\n- B: \"retail-e-commerce/template_b_v1\" (General retail/fashion)\n- C: \"retail-e-commerce/template_c_v1\" (Fashion/Apparel - 'Believe')\n\n**Single-Variant Industries**\n- Automotive: \"automotive/template_a_v1\"\n- Cleaning: \"cleaning/template_a_v1\"\n- Consulting: \"consulting/template_b_v1\"\n- Farming: \"farming/template_a_v1\"\n- Insurance: \"insurance/template_a_v1\"\n- Legal Services: \"legal-services/template_a_v1\"\n- Logistics: \"logistics/template_a_v1\"\n- Real Estate: \"real-estate/template_a_v1\"\n- Technology: \"technology/template_a_v1\"\n\n**Other/Niche**\n- Festivals/Events: \"other/festivals\"\n- Hotel/Hospitality: \"other/hotel\"\n- Non-Profit/Charity: \"other/non-profit\"\n- Portfolio/Creative: \"other/portfolio\"\n- Solar/Renewable: \"other/solar\"\n\n### Selection Logic\n1. Match industry first\n2. If multiple variants exist, analyze business intent to pick best fit\n3. If industry is unclear, default to closest match\n4. Return INTENT_UNCLEAR only if truly ambiguous\n\n### CRITICAL: Output Format\nRespond with ONLY valid JSON. No markdown, no explanation:\n{\n  \"thinking_process\": \"Your analysis of why you selected this template...\",\n  \"selected_template\": \"industry/template_x_v1\",\n  \"status\": \"CONFIRMED\"\n}\n\nIf unclear: {\"thinking_process\": \"reason\", \"selected_template\": null, \"status\": \"INTENT_UNCLEAR\"}`,\n  cache_control: { type: \"ephemeral\" }  // <<< ENABLE CACHING\n};\n\n// DYNAMIC USER PROMPT - Changes per request (NOT cached)\nconst userPrompt = {\n  type: \"text\",\n  text: `### Client Data\n- Industry: ${project.industry_sector || 'unknown'}\n- Business Intent: \"${project.business_intent || 'N/A'}\"\n- Business Name: \"${project.client_name || 'N/A'}\"\n- City: ${project.city || 'South Africa'}\n\nSelect the best template now and return JSON only.`\n};\n\n// Build complete API payload\nconst apiPayload = {\n  model: \"claude-3-5-haiku-20241022\",\n  max_tokens: 500,\n  system: [systemPrompt],\n  messages: [\n    {\n      role: \"user\",\n      content: [userPrompt]\n    }\n  ]\n};\n\nreturn {\n  json: {\n    apiPayload,\n    project,\n    caching_enabled: true\n  }\n};"
+            },
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                880,
+                0
+            ],
+            "id": "build-cached-prompt",
+            "name": "Build Cached Prompt - Planning"
+        },
+        {
+            "parameters": {
+                "method": "POST",
+                "url": "https://api.anthropic.com/v1/messages",
+                "sendHeaders": true,
+                "headerParameters": {
+                    "parameters": [
+                        {
+                            "name": "anthropic-version",
+                            "value": "2023-06-01"
+                        },
+                        {
+                            "name": "anthropic-beta",
+                            "value": "prompt-caching-2024-07-31"
+                        },
+                        {
+                            "name": "x-api-key",
+                            "value": "={{$credentials.anthropicApi.apiKey}}"
+                        },
+                        {
+                            "name": "Content-Type",
+                            "value": "application/json"
+                        }
+                    ]
+                },
+                "sendBody": true,
+                "specifyBody": "json",
+                "jsonBody": "={{ JSON.stringify($json.apiPayload) }}",
+                "options": {
+                    "timeout": 60000
+                }
+            },
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.3,
+            "position": [
+                1120,
+                0
+            ],
+            "id": "claude-api-cached",
+            "name": "Claude API - With Caching",
+            "credentials": {
+                "httpHeaderAuth": {
+                    "id": "YOUR_ANTHROPIC_CREDENTIAL_ID",
+                    "name": "Anthropic API Key"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "jsCode": "// Parse Claude response and extract template selection\n// Also log cache performance metrics\n\nconst response = $input.first().json;\nconst project = $('Build Cached Prompt - Planning').item.json.project;\n\n// Log cache performance\nconst cacheMetrics = {\n  cache_creation_tokens: response.usage?.cache_creation_input_tokens || 0,\n  cache_read_tokens: response.usage?.cache_read_input_tokens || 0,\n  input_tokens: response.usage?.input_tokens || 0,\n  output_tokens: response.usage?.output_tokens || 0\n};\n\nconsole.log('📊 CACHE METRICS:', JSON.stringify(cacheMetrics));\n\n// Calculate savings\nlet cacheStatus = 'CACHE_MISS';\nif (cacheMetrics.cache_read_tokens > 0) {\n  cacheStatus = 'CACHE_HIT';\n  const savedTokens = cacheMetrics.cache_read_tokens;\n  const savings = (savedTokens * 0.000003 * 0.75).toFixed(6); // 75% cheaper\n  console.log(`💰 Cache saved ~$${savings} on this request (${savedTokens} tokens cached)`);\n}\n\n// Parse the AI response\nlet decision;\ntry {\n  const textContent = response.content?.[0]?.text || '';\n  const jsonMatch = textContent.match(/\\{[\\s\\S]*\\}/);\n  if (jsonMatch) {\n    decision = JSON.parse(jsonMatch[0]);\n  } else {\n    throw new Error('No JSON found in response');\n  }\n} catch (e) {\n  decision = {\n    status: 'INTENT_UNCLEAR',\n    thinking_process: `Parse error: ${e.message}`,\n    selected_template: null\n  };\n}\n\nreturn {\n  json: {\n    ...project,\n    ...decision,\n    template_path: decision.selected_template,\n    cacheStatus,\n    cacheMetrics,\n    githubUrl: decision.status === 'CONFIRMED'\n      ? `https://api.github.com/repos/MtronikaSP/mtronika-templates/contents/${decision.selected_template}/blueprint.md`\n      : null\n  }\n};"
+            },
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                1360,
+                0
+            ],
+            "id": "parse-planning-response",
+            "name": "Parse Planning + Cache Metrics"
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "boolean": [
+                        {
+                            "value1": "={{ $json.status === 'CONFIRMED' }}",
+                            "value2": true
+                        }
+                    ]
+                }
+            },
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 1,
+            "position": [
+                1600,
+                0
+            ],
+            "id": "if-confirmed",
+            "name": "IF Template Confirmed?"
+        },
+        {
+            "parameters": {
+                "authentication": "oAuth2",
+                "resource": "file",
+                "operation": "get",
+                "owner": {
+                    "__rl": true,
+                    "value": "MtronikaSP",
+                    "mode": "list"
+                },
+                "repository": {
+                    "__rl": true,
+                    "value": "mtronika-templates",
+                    "mode": "list"
+                },
+                "filePath": "={{ $json.template_path }}/blueprint.md",
+                "asBinaryProperty": false,
+                "additionalParameters": {}
+            },
+            "type": "n8n-nodes-base.github",
+            "typeVersion": 1.1,
+            "position": [
+                1840,
+                -80
+            ],
+            "id": "github-get-blueprint",
+            "name": "GitHub - Get Blueprint",
+            "credentials": {
+                "githubOAuth2Api": {
+                    "id": "YOUR_GITHUB_CREDENTIAL_ID",
+                    "name": "GitHub account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "jsCode": "// Build Senior Dev prompt with caching\n// The SYSTEM prompt with generation rules is cached\n// Blueprint and client data are dynamic\n\nconst blueprintRaw = $input.first().json.content;\nconst project = $('Parse Planning + Cache Metrics').item.json;\n\n// Decode blueprint from base64\nlet blueprint;\ntry {\n  blueprint = Buffer.from(blueprintRaw, 'base64').toString('utf8');\n} catch (e) {\n  blueprint = blueprintRaw;\n}\n\n// STATIC SYSTEM PROMPT - CACHED (saves ~75% cost)\nconst systemPrompt = {\n  type: \"text\",\n  text: `### Role\nYou are a Senior Frontend Developer at Mtronika, South Africa.\n\n### Your Expertise\n- Bootstrap 5 responsive design (12-column grid)\n- Semantic HTML5 and CSS3 best practices\n- SEO optimization for South African SME businesses\n- Mobile-first, accessible web development\n\n### Critical Generation Rules\n1. Output ONLY valid HTML5 (DOCTYPE, proper nesting, all closing tags)\n2. Embed ALL CSS in a <style> block within <head>\n3. Embed ALL JavaScript in a <script> block before </body>\n4. Use semantic HTML elements (<header>, <main>, <section>, <footer>)\n5. Include ARIA roles for accessibility\n6. Use CSS variables for brand colors:\n   :root { --primary: {{brand_colour}}; --primary-dark: adjusted; }\n7. All images use Picsum.photos placeholders with project seed\n8. Footer must include: © 2026 {{business_name}}. Designed by Mtronika.\n9. Include WhatsApp float button (green #25D366, fixed bottom-right)\n10. Meta tags for SEO (title, description, keywords)\n\n### Output Format\nReturn ONLY the complete HTML wrapped in markdown code block:\n\\`\\`\\`html\n<!DOCTYPE html>\n<html lang=\"en\">\n<head>...</head>\n<body>...</body>\n</html>\n\\`\\`\\`\n\nDo NOT include any explanation before or after the HTML.`,\n  cache_control: { type: \"ephemeral\" }  // <<< ENABLE CACHING\n};\n\n// DYNAMIC USER PROMPT - Changes per client\nconst brandColour = project.brand_colour || '#FF6600';\nconst userPrompt = {\n  type: \"text\",\n  text: `### Client Information\n- Business Name: \"${project.client_name}\"\n- Industry: ${project.industry_sector}\n- Intent: \"${project.business_intent}\"\n- Brand Color: ${brandColour}\n- City: ${project.city || 'Krugersdorp'}\n- Phone: ${project.client_phone || 'N/A'}\n- WhatsApp: ${project.client_phone ? '27' + project.client_phone.replace(/^0/, '') : 'N/A'}\n- Project Ref: ${project.project_ref}\n\n### Blueprint (Template Structure)\n${blueprint}\n\n### Tasks\n1. Generate a complete single-page website based on the blueprint structure\n2. Replace ALL placeholder text with professional copy for \"${project.client_name}\"\n3. Apply brand color ${brandColour} to buttons, navbar, and accent elements\n4. Use Picsum.photos for images: https://picsum.photos/seed/${project.project_ref}-N/W/H\n5. Include WhatsApp contact link if phone is provided\n\nGenerate the complete HTML now.`\n};\n\nconst apiPayload = {\n  model: \"claude-3-5-sonnet-20241022\",\n  max_tokens: 16000,\n  system: [systemPrompt],\n  messages: [\n    {\n      role: \"user\",\n      content: [userPrompt]\n    }\n  ]\n};\n\nreturn {\n  json: {\n    apiPayload,\n    project,\n    blueprint\n  }\n};"
+            },
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                2080,
+                -80
+            ],
+            "id": "build-dev-prompt",
+            "name": "Build Cached Prompt - Senior Dev"
+        },
+        {
+            "parameters": {
+                "method": "POST",
+                "url": "https://api.anthropic.com/v1/messages",
+                "sendHeaders": true,
+                "headerParameters": {
+                    "parameters": [
+                        {
+                            "name": "anthropic-version",
+                            "value": "2023-06-01"
+                        },
+                        {
+                            "name": "anthropic-beta",
+                            "value": "prompt-caching-2024-07-31"
+                        },
+                        {
+                            "name": "x-api-key",
+                            "value": "={{$credentials.anthropicApi.apiKey}}"
+                        },
+                        {
+                            "name": "Content-Type",
+                            "value": "application/json"
+                        }
+                    ]
+                },
+                "sendBody": true,
+                "specifyBody": "json",
+                "jsonBody": "={{ JSON.stringify($json.apiPayload) }}",
+                "options": {
+                    "timeout": 120000
+                }
+            },
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.3,
+            "position": [
+                2320,
+                -80
+            ],
+            "id": "claude-api-dev",
+            "name": "Claude API - Generate HTML"
+        },
+        {
+            "parameters": {
+                "jsCode": "// Parse HTML from Claude response and log cache metrics\n\nconst response = $input.first().json;\nconst project = $('Build Cached Prompt - Senior Dev').item.json.project;\n\n// Log cache performance\nconst cacheMetrics = {\n  cache_creation_tokens: response.usage?.cache_creation_input_tokens || 0,\n  cache_read_tokens: response.usage?.cache_read_input_tokens || 0,\n  input_tokens: response.usage?.input_tokens || 0,\n  output_tokens: response.usage?.output_tokens || 0\n};\n\nlet cacheStatus = cacheMetrics.cache_read_tokens > 0 ? 'CACHE_HIT' : 'CACHE_MISS';\nconsole.log(`📊 Senior Dev Cache: ${cacheStatus} - Read ${cacheMetrics.cache_read_tokens} cached tokens`);\n\n// Extract HTML from response\nlet processedHtml = '';\ntry {\n  const textContent = response.content?.[0]?.text || '';\n  const htmlMatch = textContent.match(/```html([\\s\\S]*?)```/);\n  if (htmlMatch) {\n    processedHtml = htmlMatch[1].trim();\n  } else {\n    // If no code block, use the entire response\n    processedHtml = textContent;\n  }\n} catch (e) {\n  console.error('Parse error:', e.message);\n  processedHtml = '<html><body><h1>Error generating HTML</h1></body></html>';\n}\n\nreturn {\n  json: {\n    ...project,\n    processedHtml,\n    htmlSize: processedHtml.length,\n    cacheStatus,\n    cacheMetrics\n  }\n};"
+            },
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                2560,
+                -80
+            ],
+            "id": "parse-html-response",
+            "name": "Parse HTML + Cache Metrics"
+        },
+        {
+            "parameters": {
+                "operation": "update",
+                "table": {
+                    "__rl": true,
+                    "value": "projects",
+                    "mode": "list"
+                },
+                "dataMode": "defineBelow",
+                "columnToMatchOn": "project_ref",
+                "valueToMatchOn": "={{ $json.project_ref }}",
+                "valuesToSend": {
+                    "values": [
+                        {
+                            "column": "template_path",
+                            "value": "={{ $json.template_path }}"
+                        },
+                        {
+                            "column": "processed_html",
+                            "value": "={{ $json.processedHtml }}"
+                        },
+                        {
+                            "column": "deployment_status",
+                            "value": "Design_Complete"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "type": "n8n-nodes-base.mySql",
+            "typeVersion": 2.5,
+            "position": [
+                2800,
+                -80
+            ],
+            "id": "mysql-save",
+            "name": "MySQL - Save HTML",
+            "credentials": {
+                "mySql": {
+                    "id": "YOUR_MYSQL_CREDENTIAL_ID",
+                    "name": "MySQL account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "respondWith": "json",
+                "responseBody": "={\n  \"status\": \"design_complete\",\n  \"project_ref\": \"{{ $('Parse HTML + Cache Metrics').item.json.project_ref }}\",\n  \"template_used\": \"{{ $('Parse Planning + Cache Metrics').item.json.template_path }}\",\n  \"html_size\": {{ $('Parse HTML + Cache Metrics').item.json.htmlSize || 0 }},\n  \"cache_performance\": {\n    \"planning_agent\": \"{{ $('Parse Planning + Cache Metrics').item.json.cacheStatus }}\",\n    \"dev_agent\": \"{{ $('Parse HTML + Cache Metrics').item.json.cacheStatus }}\"\n  }\n}",
+                "options": {
+                    "responseCode": 200
+                }
+            },
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1.5,
+            "position": [
+                3040,
+                -80
+            ],
+            "id": "respond-webhook",
+            "name": "Respond to Webhook"
+        },
+        {
+            "parameters": {
+                "content": "## ⚙️ Setup Instructions\n\n### 1. Create HTTP Header Auth Credential\n**Name:** Anthropic API Key\n**Header Name:** Authorization (NOT used - we send x-api-key directly)\n\n### 2. Store API Key\nCreate a credential of type \"Header Auth\" or use the credential expression:\n`={{$credentials.anthropicApi.apiKey}}`\n\nAlternatively, hardcode your key in the headers (less secure but simpler for testing).\n\n### 3. Important Headers\n```\nanthropic-version: 2023-06-01\nanthropic-beta: prompt-caching-2024-07-31  ← REQUIRED FOR CACHING\nx-api-key: sk-ant-api...\n```\n\n### 4. Cache Behavior\n- Cache persists for 5 minutes after last use\n- Minimum 1024 tokens to cache\n- First request creates cache (slight extra cost)\n- Subsequent requests read from cache (75% cheaper)",
+                "height": 500,
+                "width": 400,
+                "color": 4
+            },
+            "type": "n8n-nodes-base.stickyNote",
+            "position": [
+                880,
+                -400
+            ],
+            "typeVersion": 1,
+            "id": "setup-note",
+            "name": "Sticky Note - Setup"
+        }
+    ],
+    "connections": {
+        "Webhook - Start Design (Cached)": {
+            "main": [
+                [
+                    {
+                        "node": "MySQL - Get Project",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "MySQL - Get Project": {
+            "main": [
+                [
+                    {
+                        "node": "Build Cached Prompt - Planning",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Build Cached Prompt - Planning": {
+            "main": [
+                [
+                    {
+                        "node": "Claude API - With Caching",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Claude API - With Caching": {
+            "main": [
+                [
+                    {
+                        "node": "Parse Planning + Cache Metrics",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Parse Planning + Cache Metrics": {
+            "main": [
+                [
+                    {
+                        "node": "IF Template Confirmed?",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "IF Template Confirmed?": {
+            "main": [
+                [],
+                [
+                    {
+                        "node": "GitHub - Get Blueprint",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "GitHub - Get Blueprint": {
+            "main": [
+                [
+                    {
+                        "node": "Build Cached Prompt - Senior Dev",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Build Cached Prompt - Senior Dev": {
+            "main": [
+                [
+                    {
+                        "node": "Claude API - Generate HTML",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Claude API - Generate HTML": {
+            "main": [
+                [
+                    {
+                        "node": "Parse HTML + Cache Metrics",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Parse HTML + Cache Metrics": {
+            "main": [
+                [
+                    {
+                        "node": "MySQL - Save HTML",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "MySQL - Save HTML": {
+            "main": [
+                [
+                    {
+                        "node": "Respond to Webhook",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "settings": {
+        "executionOrder": "v1"
+    },
+    "staticData": null,
+    "meta": {
+        "instanceId": "mtronika-prompt-caching"
+    },
+    "pinData": {},
+    "versionId": "3.0-prompt-caching",
+    "triggerCount": 0
+}

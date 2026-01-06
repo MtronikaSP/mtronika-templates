@@ -1,0 +1,741 @@
+{
+    "name": "WF-WD-03.5: Content Upload Confirmation",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "whatsapp-webhook",
+                "responseMode": "responseNode",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 2.1,
+            "position": [
+                -192,
+                384
+            ],
+            "id": "7088b19c-0d71-4e30-9080-f8c84fee29a0",
+            "name": "Webhook - WhatsApp POST",
+            "webhookId": "whatsapp-webhook"
+        },
+        {
+            "parameters": {
+                "path": "whatsapp-verify",
+                "responseMode": "responseNode",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 2.1,
+            "position": [
+                -192,
+                144
+            ],
+            "id": "498c33c5-f0a1-48ee-be72-3ad3f1d77b6c",
+            "name": "Webhook - Meta Verify (GET)",
+            "webhookId": "whatsapp-verify"
+        },
+        {
+            "parameters": {
+                "path": "content-uploaded",
+                "httpMethod": "GET",
+                "responseMode": "responseNode",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 2.1,
+            "position": [
+                -192,
+                624
+            ],
+            "id": "webhook-content-url",
+            "name": "Webhook - Content URL",
+            "webhookId": "content-uploaded"
+        },
+        {
+            "parameters": {
+                "jsCode": "// Handle Meta GET verification\nconst query = $input.first().json.query || {};\nconst VERIFY_TOKEN = 'MtronikaVerify2026';\n\nif (query['hub.verify_token'] === VERIFY_TOKEN) {\n  return [{ json: { challenge: query['hub.challenge'] } }];\n}\nreturn [{ json: { error: 'Invalid token' } }];"
+            },
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                48,
+                144
+            ],
+            "id": "21cca42f-cce3-4ddf-ba42-798ba2e7d0dd",
+            "name": "Validate Token"
+        },
+        {
+            "parameters": {
+                "respondWith": "text",
+                "responseBody": "={{ $json.challenge }}",
+                "options": {
+                    "responseCode": 200,
+                    "responseHeaders": {
+                        "entries": [
+                            {
+                                "name": "Content-Type",
+                                "value": "text/plain"
+                            }
+                        ]
+                    }
+                }
+            },
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1.5,
+            "position": [
+                288,
+                144
+            ],
+            "id": "63c8a435-3bd3-4710-a2e4-f7bc68963c0a",
+            "name": "Respond - Challenge"
+        },
+        {
+            "parameters": {
+                "jsCode": "// Parse WhatsApp button click\nconst input = $input.first().json;\nconst body = input.body || input;\n\ntry {\n  const entry = body.entry && body.entry[0];\n  const changes = entry && entry.changes && entry.changes[0];\n  const value = changes && changes.value;\n  const message = value && value.messages && value.messages[0];\n  \n  if (message && message.type === 'interactive') {\n    const buttonId = message.interactive.button_reply.id || '';\n    const match = buttonId.match(/CONTENT_UPLOADED_(WD-\\d{4}-[A-Z0-9]+)/i);\n    \n    if (match) {\n      return [{\n        json: {\n          isButtonClick: true,\n          project_ref: match[1],\n          sender_phone: message.from\n        }\n      }];\n    }\n  }\n  return [{ json: { skip: true } }];\n} catch (e) {\n  return [{ json: { skip: true, error: e.message } }];\n}"
+            },
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                48,
+                384
+            ],
+            "id": "a013fd5c-7462-4f97-a60b-c12ecfeea935",
+            "name": "Parse Button Click"
+        },
+        {
+            "parameters": {
+                "jsCode": "// Parse URL-based content confirmation\n// URL Format: /webhook/content-uploaded?ref=WD-2026-XXXXXXXX\nconst query = $input.first().json.query || {};\nconst ref = query.ref;\n\nif (ref && ref.match(/^WD-\\d{4}-[A-Z0-9]+$/i)) {\n  return [{\n    json: {\n      isUrlClick: true,\n      project_ref: ref\n    }\n  }];\n}\nreturn [{ json: { skip: true, error: 'Invalid or missing project reference' } }];"
+            },
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                48,
+                624
+            ],
+            "id": "code-parse-url",
+            "name": "Parse URL Ref"
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "options": {
+                        "caseSensitive": true,
+                        "leftValue": "",
+                        "typeValidation": "strict"
+                    },
+                    "conditions": [
+                        {
+                            "id": "btn-check",
+                            "leftValue": "={{ $json.isButtonClick }}",
+                            "rightValue": true,
+                            "operator": {
+                                "type": "boolean",
+                                "operation": "true"
+                            }
+                        }
+                    ],
+                    "combinator": "and"
+                },
+                "options": {}
+            },
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 2.2,
+            "position": [
+                288,
+                384
+            ],
+            "id": "a22a00bd-ea06-4a11-9a03-ae53008145f9",
+            "name": "IF Button Click?"
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "options": {
+                        "caseSensitive": true,
+                        "leftValue": "",
+                        "typeValidation": "strict"
+                    },
+                    "conditions": [
+                        {
+                            "id": "url-check",
+                            "leftValue": "={{ $json.isUrlClick }}",
+                            "rightValue": true,
+                            "operator": {
+                                "type": "boolean",
+                                "operation": "true"
+                            }
+                        }
+                    ],
+                    "combinator": "and"
+                },
+                "options": {}
+            },
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 2.2,
+            "position": [
+                288,
+                624
+            ],
+            "id": "if-url-valid",
+            "name": "IF URL Valid?"
+        },
+        {
+            "parameters": {
+                "operation": "executeQuery",
+                "query": "SELECT * FROM projects WHERE project_ref = '{{ $json.project_ref }}' AND status = 'Active' LIMIT 1;",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.mySql",
+            "typeVersion": 2.5,
+            "position": [
+                528,
+                384
+            ],
+            "id": "mysql-get-button",
+            "name": "MySQL - Get Project (Button)",
+            "alwaysOutputData": true,
+            "credentials": {
+                "mySql": {
+                    "id": "d6FdnZlnAEJ1AtZJ",
+                    "name": "MySQL account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "operation": "executeQuery",
+                "query": "SELECT * FROM projects WHERE project_ref = '{{ $json.project_ref }}' AND status = 'Active' LIMIT 1;",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.mySql",
+            "typeVersion": 2.5,
+            "position": [
+                528,
+                624
+            ],
+            "id": "mysql-get-url",
+            "name": "MySQL - Get Project (URL)",
+            "alwaysOutputData": true,
+            "credentials": {
+                "mySql": {
+                    "id": "d6FdnZlnAEJ1AtZJ",
+                    "name": "MySQL account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "options": {
+                        "caseSensitive": true,
+                        "leftValue": "",
+                        "typeValidation": "strict"
+                    },
+                    "conditions": [
+                        {
+                            "id": "proj-check",
+                            "leftValue": "={{ $json.id }}",
+                            "rightValue": "",
+                            "operator": {
+                                "type": "string",
+                                "operation": "isNotEmpty"
+                            }
+                        }
+                    ],
+                    "combinator": "and"
+                },
+                "options": {}
+            },
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 2.2,
+            "position": [
+                768,
+                384
+            ],
+            "id": "if-proj-button",
+            "name": "IF Project Found? (Button)"
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "options": {
+                        "caseSensitive": true,
+                        "leftValue": "",
+                        "typeValidation": "strict"
+                    },
+                    "conditions": [
+                        {
+                            "id": "proj-check-url",
+                            "leftValue": "={{ $json.id }}",
+                            "rightValue": "",
+                            "operator": {
+                                "type": "string",
+                                "operation": "isNotEmpty"
+                            }
+                        }
+                    ],
+                    "combinator": "and"
+                },
+                "options": {}
+            },
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 2.2,
+            "position": [
+                768,
+                624
+            ],
+            "id": "if-proj-url",
+            "name": "IF Project Found? (URL)"
+        },
+        {
+            "parameters": {
+                "operation": "executeQuery",
+                "query": "UPDATE projects SET status = 'Content_Received', content_uploaded_at = NOW() WHERE project_ref = '{{ $('Parse Button Click').item.json.project_ref }}';",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.mySql",
+            "typeVersion": 2.5,
+            "position": [
+                1008,
+                304
+            ],
+            "id": "mysql-update-button",
+            "name": "MySQL - Update Status (Button)",
+            "credentials": {
+                "mySql": {
+                    "id": "d6FdnZlnAEJ1AtZJ",
+                    "name": "MySQL account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "operation": "executeQuery",
+                "query": "UPDATE projects SET status = 'Content_Received', content_uploaded_at = NOW() WHERE project_ref = '{{ $('Parse URL Ref').item.json.project_ref }}';",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.mySql",
+            "typeVersion": 2.5,
+            "position": [
+                1008,
+                544
+            ],
+            "id": "mysql-update-url",
+            "name": "MySQL - Update Status (URL)",
+            "credentials": {
+                "mySql": {
+                    "id": "d6FdnZlnAEJ1AtZJ",
+                    "name": "MySQL account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "phoneNumberId": "911618885374326",
+                "recipientPhoneNumber": "={{ $('Parse Button Click').item.json.sender_phone }}",
+                "textBody": "=✅ Awesome! We got your content for project *{{ $('Parse Button Click').item.json.project_ref }}*!\n\n🎨 Our design team will start building within 48 hours.\n\n📩 You'll get a preview link when the first draft is ready.\n\n_Thanks for choosing Mtronika!_"
+            },
+            "type": "n8n-nodes-base.whatsApp",
+            "typeVersion": 1.1,
+            "position": [
+                1248,
+                224
+            ],
+            "id": "wa-thank-button",
+            "name": "WhatsApp - Thank Client (Button)",
+            "credentials": {
+                "whatsAppApi": {
+                    "id": "yYwdv31XNhj0JHzv",
+                    "name": "WhatsApp Cloud API - 27 68 608 8321"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "phoneNumberId": "911618885374326",
+                "recipientPhoneNumber": "={{ $('MySQL - Get Project (URL)').item.json.client_phone.replace(/^0/, '27') }}",
+                "textBody": "=✅ Awesome! We got your content for project *{{ $('Parse URL Ref').item.json.project_ref }}*!\n\n🎨 Our design team will start building within 48 hours.\n\n📩 You'll get a preview link when the first draft is ready.\n\n_Thanks for choosing Mtronika!_"
+            },
+            "type": "n8n-nodes-base.whatsApp",
+            "typeVersion": 1.1,
+            "position": [
+                1248,
+                464
+            ],
+            "id": "wa-thank-url",
+            "name": "WhatsApp - Thank Client (URL)",
+            "credentials": {
+                "whatsAppApi": {
+                    "id": "yYwdv31XNhj0JHzv",
+                    "name": "WhatsApp Cloud API - 27 68 608 8321"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "fromEmail": "projects@mtronika.co.za",
+                "toEmail": "website-orders@mtronika.co.za",
+                "subject": "=📁 Content Uploaded: {{ $('MySQL - Get Project (Button)').item.json.project_ref }}",
+                "html": "=<h2>Content Received</h2><p>Client <b>{{ $('MySQL - Get Project (Button)').item.json.client_name }}</b> uploaded content for project <b>{{ $('MySQL - Get Project (Button)').item.json.project_ref }}</b>.</p><p><a href='{{ $('MySQL - Get Project (Button)').item.json.drive_link }}'>View Folder</a> | <a href='https://omo.mtronika.co.za/webhook/start-design?ref={{ $('MySQL - Get Project (Button)').item.json.project_ref }}'>Start Design</a></p>",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.emailSend",
+            "typeVersion": 2.1,
+            "position": [
+                1248,
+                384
+            ],
+            "id": "email-admin-button",
+            "name": "Email - Notify Admin (Button)",
+            "credentials": {
+                "smtp": {
+                    "id": "TvYLDVjPK9MEHOk9",
+                    "name": "SMTP account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "fromEmail": "projects@mtronika.co.za",
+                "toEmail": "website-orders@mtronika.co.za",
+                "subject": "=📁 Content Uploaded: {{ $('MySQL - Get Project (URL)').item.json.project_ref }}",
+                "html": "=<h2>Content Received</h2><p>Client <b>{{ $('MySQL - Get Project (URL)').item.json.client_name }}</b> uploaded content for project <b>{{ $('MySQL - Get Project (URL)').item.json.project_ref }}</b>.</p><p><a href='{{ $('MySQL - Get Project (URL)').item.json.drive_link }}'>View Folder</a> | <a href='https://omo.mtronika.co.za/webhook/start-design?ref={{ $('MySQL - Get Project (URL)').item.json.project_ref }}'>Start Design</a></p>",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.emailSend",
+            "typeVersion": 2.1,
+            "position": [
+                1248,
+                624
+            ],
+            "id": "email-admin-url",
+            "name": "Email - Notify Admin (URL)",
+            "credentials": {
+                "smtp": {
+                    "id": "TvYLDVjPK9MEHOk9",
+                    "name": "SMTP account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "respondWith": "json",
+                "responseBody": "={{ { success: true } }}",
+                "options": {
+                    "responseCode": 200
+                }
+            },
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1.5,
+            "position": [
+                1488,
+                304
+            ],
+            "id": "respond-ok-button",
+            "name": "Respond - OK (Button)"
+        },
+        {
+            "parameters": {
+                "respondWith": "text",
+                "responseBody": "=<!DOCTYPE html>\n<html>\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>Content Received - Mtronika</title>\n    <style>\n        body { font-family: Arial, sans-serif; background: linear-gradient(135deg, #ff0000 0%, #ff6600 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; margin: 0; }\n        .card { background: white; padding: 50px; border-radius: 20px; text-align: center; box-shadow: 0 25px 50px rgba(0,0,0,0.25); max-width: 500px; width: 90%; margin: 20px; }\n        .icon { font-size: 80px; margin-bottom: 20px; animation: bounce 0.6s ease; }\n        @keyframes bounce { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.2); } }\n        h1 { color: #ff0000; margin: 0 0 15px; font-size: 28px; }\n        p { color: #333; line-height: 1.6; font-size: 16px; }\n        strong { color: #ff0000; }\n        .footer { margin-top: 30px; color: #777; font-size: 12px; }\n    </style>\n</head>\n<body>\n    <div class=\"card\">\n        <div class=\"icon\">✅</div>\n        <h1>Content Received!</h1>\n        <p>Thanks! We got your content for project <strong>{{ $('Parse URL Ref').item.json.project_ref }}</strong>.</p>\n        <p>Our design team will start building within 48 hours. You'll get a preview link when the first draft is ready.</p>\n        <div class=\"footer\">Joy in Every Click - Mtronika</div>\n    </div>\n</body>\n</html>",
+                "options": {
+                    "responseCode": 200,
+                    "responseHeaders": {
+                        "entries": [
+                            {
+                                "name": "Content-Type",
+                                "value": "text/html"
+                            }
+                        ]
+                    }
+                }
+            },
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1.5,
+            "position": [
+                1488,
+                544
+            ],
+            "id": "respond-ok-url",
+            "name": "Respond - Success Page (URL)"
+        },
+        {
+            "parameters": {
+                "respondWith": "json",
+                "responseBody": "={{ { received: true } }}",
+                "options": {
+                    "responseCode": 200
+                }
+            },
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1.5,
+            "position": [
+                528,
+                480
+            ],
+            "id": "respond-skip-button",
+            "name": "Respond - Skip (Button)"
+        },
+        {
+            "parameters": {
+                "respondWith": "text",
+                "responseBody": "=<!DOCTYPE html>\n<html>\n<head>\n    <meta charset=\"UTF-8\">\n    <title>Error - Mtronika</title>\n    <style>\n        body { font-family: Arial, sans-serif; background: #f5f5f5; min-height: 100vh; display: flex; align-items: center; justify-content: center; margin: 0; }\n        .card { background: white; padding: 50px; border-radius: 20px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.1); max-width: 500px; }\n        .icon { font-size: 60px; margin-bottom: 20px; }\n        h1 { color: #ff0000; margin: 0 0 15px; }\n        p { color: #666; }\n    </style>\n</head>\n<body>\n    <div class=\"card\">\n        <div class=\"icon\">❌</div>\n        <h1>Project Not Found</h1>\n        <p>We couldn't find that project. Please check the link and try again, or contact us on WhatsApp.</p>\n    </div>\n</body>\n</html>",
+                "options": {
+                    "responseCode": 404,
+                    "responseHeaders": {
+                        "entries": [
+                            {
+                                "name": "Content-Type",
+                                "value": "text/html"
+                            }
+                        ]
+                    }
+                }
+            },
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1.5,
+            "position": [
+                528,
+                720
+            ],
+            "id": "respond-error-url",
+            "name": "Respond - Error (URL)"
+        },
+        {
+            "parameters": {
+                "content": "## Meta Webhook Verification\n\n**Use THIS URL in Meta Developer Console:**\n`https://omo.mtronika.co.za/webhook/whatsapp-verify`\n\n**Verify Token:** `MtronikaVerify2026`\n\n**For message webhook:**\n`https://omo.mtronika.co.za/webhook/whatsapp-webhook`\n\n---\n\n## URL-Based Confirmation\n\n**Client clicks this link in WhatsApp:**\n`https://omo.mtronika.co.za/webhook/content-uploaded?ref=WD-XXX`\n\n**This provides a browser-based confirmation page.**",
+                "height": 450,
+                "width": 400,
+                "color": 5
+            },
+            "type": "n8n-nodes-base.stickyNote",
+            "typeVersion": 1,
+            "position": [
+                -192,
+                -280
+            ],
+            "id": "sticky-setup",
+            "name": "Setup Instructions"
+        }
+    ],
+    "connections": {
+        "Webhook - Meta Verify (GET)": {
+            "main": [
+                [
+                    {
+                        "node": "Validate Token",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Validate Token": {
+            "main": [
+                [
+                    {
+                        "node": "Respond - Challenge",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Webhook - WhatsApp POST": {
+            "main": [
+                [
+                    {
+                        "node": "Parse Button Click",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Parse Button Click": {
+            "main": [
+                [
+                    {
+                        "node": "IF Button Click?",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "IF Button Click?": {
+            "main": [
+                [
+                    {
+                        "node": "MySQL - Get Project (Button)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Respond - Skip (Button)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "MySQL - Get Project (Button)": {
+            "main": [
+                [
+                    {
+                        "node": "IF Project Found? (Button)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "IF Project Found? (Button)": {
+            "main": [
+                [
+                    {
+                        "node": "MySQL - Update Status (Button)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Respond - Skip (Button)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "MySQL - Update Status (Button)": {
+            "main": [
+                [
+                    {
+                        "node": "WhatsApp - Thank Client (Button)",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "Email - Notify Admin (Button)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "WhatsApp - Thank Client (Button)": {
+            "main": [
+                [
+                    {
+                        "node": "Respond - OK (Button)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Webhook - Content URL": {
+            "main": [
+                [
+                    {
+                        "node": "Parse URL Ref",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Parse URL Ref": {
+            "main": [
+                [
+                    {
+                        "node": "IF URL Valid?",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "IF URL Valid?": {
+            "main": [
+                [
+                    {
+                        "node": "MySQL - Get Project (URL)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Respond - Error (URL)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "MySQL - Get Project (URL)": {
+            "main": [
+                [
+                    {
+                        "node": "IF Project Found? (URL)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "IF Project Found? (URL)": {
+            "main": [
+                [
+                    {
+                        "node": "MySQL - Update Status (URL)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Respond - Error (URL)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "MySQL - Update Status (URL)": {
+            "main": [
+                [
+                    {
+                        "node": "WhatsApp - Thank Client (URL)",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "Email - Notify Admin (URL)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "WhatsApp - Thank Client (URL)": {
+            "main": [
+                [
+                    {
+                        "node": "Respond - Success Page (URL)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "pinData": {},
+    "meta": {
+        "instanceId": "0c4e1e5325de5935e7052b5ce1c1cf23ed3ad9a4fa00e0e387f84b3088759ff5"
+    }
+}

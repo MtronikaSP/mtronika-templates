@@ -1,0 +1,360 @@
+{
+    "name": "WF-WD-HOSTING: DirectAdmin Provisioning",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "hosting-provision",
+                "authentication": "headerAuth",
+                "responseMode": "responseNode",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 2.1,
+            "position": [
+                -400,
+                300
+            ],
+            "id": "webhook-hosting",
+            "name": "Webhook - Hosting Provision",
+            "webhookId": "hosting-provision",
+            "credentials": {
+                "httpHeaderAuth": {
+                    "id": "YOUR_HEADER_AUTH_CREDENTIAL_ID",
+                    "name": "n8n API Key Header"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "jsCode": "// WF-WD-HOSTING: Generate Credentials (with Password Hashing)\n\nconst input = $json;\nconst crypto = require('crypto');\n\n// Sanitize business name for username (max 8 chars, alphanumeric only)\nconst sanitized = (input.business_name || 'user')\n  .toLowerCase()\n  .replace(/[^a-z0-9]/g, '')\n  .substring(0, 8);\n\nconst username = `${sanitized}${Date.now().toString().slice(-4)}`;\n\n// Generate secure 16-char password\nconst chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789!@#$%';\nlet password = '';\nfor (let i = 0; i < 16; i++) {\n  password += chars.charAt(Math.floor(Math.random() * chars.length));\n}\n\n// Hash password for database storage (plain password sent to client via email)\nconst passwordHash = crypto.createHash('sha256').update(password).digest('hex');\n\n// Clean domain (remove www. prefix)\nconst domain = (input.domain_name || input.domain || '').replace(/^www\\./, '');\n\nreturn {\n  json: {\n    ...input,\n    da_username: username,\n    da_password: password,           // For email to client & DirectAdmin API\n    da_password_hash: passwordHash,  // For database storage\n    domain: domain,\n    da_package: 'iflame_growth',\n    da_server: 'inqaba.dotnetz.co.za'\n  }\n};"
+            },
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                -160,
+                300
+            ],
+            "id": "generate-credentials",
+            "name": "Generate Credentials"
+        },
+        {
+            "parameters": {
+                "method": "POST",
+                "url": "https://inqaba.dotnetz.co.za:2222/CMD_API_ACCOUNT_USER",
+                "authentication": "genericCredentialType",
+                "genericAuthType": "httpBasicAuth",
+                "sendBody": true,
+                "bodyParameters": {
+                    "parameters": [
+                        {
+                            "name": "action",
+                            "value": "create"
+                        },
+                        {
+                            "name": "add",
+                            "value": "Submit"
+                        },
+                        {
+                            "name": "username",
+                            "value": "={{ $json.da_username }}"
+                        },
+                        {
+                            "name": "email",
+                            "value": "={{ $json.client_email || $json.client?.email }}"
+                        },
+                        {
+                            "name": "passwd",
+                            "value": "={{ $json.da_password }}"
+                        },
+                        {
+                            "name": "passwd2",
+                            "value": "={{ $json.da_password }}"
+                        },
+                        {
+                            "name": "domain",
+                            "value": "={{ $json.domain }}"
+                        },
+                        {
+                            "name": "package",
+                            "value": "={{ $json.da_package }}"
+                        },
+                        {
+                            "name": "notify",
+                            "value": "no"
+                        }
+                    ]
+                },
+                "options": {
+                    "retry": {
+                        "maxTries": 3,
+                        "waitBetweenTries": 5000
+                    }
+                }
+            },
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.3,
+            "position": [
+                80,
+                300
+            ],
+            "id": "da-create-user",
+            "name": "DirectAdmin - Create User",
+            "credentials": {
+                "httpBasicAuth": {
+                    "id": "YOUR_DIRECTADMIN_CREDENTIAL_ID",
+                    "name": "DirectAdmin - inqaba"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "method": "POST",
+                "url": "=https://inqaba.dotnetz.co.za:2222/CMD_API_SSL",
+                "authentication": "genericCredentialType",
+                "genericAuthType": "httpBasicAuth",
+                "sendBody": true,
+                "bodyParameters": {
+                    "parameters": [
+                        {
+                            "name": "domain",
+                            "value": "={{ $('Generate Credentials').item.json.domain }}"
+                        },
+                        {
+                            "name": "action",
+                            "value": "save"
+                        },
+                        {
+                            "name": "type",
+                            "value": "letsencrypt"
+                        },
+                        {
+                            "name": "request",
+                            "value": "letsencrypt"
+                        },
+                        {
+                            "name": "le_select0",
+                            "value": "={{ $('Generate Credentials').item.json.domain }}"
+                        },
+                        {
+                            "name": "le_wc_select0",
+                            "value": "={{ $('Generate Credentials').item.json.domain }}"
+                        }
+                    ]
+                },
+                "options": {
+                    "retry": {
+                        "maxTries": 2,
+                        "waitBetweenTries": 10000
+                    }
+                }
+            },
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.3,
+            "position": [
+                320,
+                300
+            ],
+            "id": "da-enable-ssl",
+            "name": "DirectAdmin - Enable SSL",
+            "credentials": {
+                "httpBasicAuth": {
+                    "id": "YOUR_DIRECTADMIN_CREDENTIAL_ID",
+                    "name": "DirectAdmin - inqaba"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "operation": "update",
+                "table": {
+                    "__rl": true,
+                    "value": "projects",
+                    "mode": "list",
+                    "cachedResultName": "projects"
+                },
+                "dataMode": "defineBelow",
+                "columnToMatchOn": "project_ref",
+                "valueToMatchOn": "={{ $('Generate Credentials').item.json.project_id }}",
+                "valuesToSend": {
+                    "values": [
+                        {
+                            "column": "da_username",
+                            "value": "={{ $('Generate Credentials').item.json.da_username }}"
+                        },
+                        {
+                            "column": "da_password_hash",
+                            "value": "={{ $('Generate Credentials').item.json.da_password_hash }}"
+                        },
+                        {
+                            "column": "da_login_link",
+                            "value": "=https://inqaba.dotnetz.co.za:2222"
+                        },
+                        {
+                            "column": "hosting_status",
+                            "value": "Provisioned"
+                        },
+                        {
+                            "column": "hosting_provisioned_at",
+                            "value": "={{ new Date().toISOString().slice(0, 19).replace('T', ' ') }}"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "type": "n8n-nodes-base.mySql",
+            "typeVersion": 2.5,
+            "position": [
+                560,
+                300
+            ],
+            "id": "mysql-update",
+            "name": "MySQL - Update Project",
+            "credentials": {
+                "mySql": {
+                    "id": "YOUR_MYSQL_CREDENTIAL_ID",
+                    "name": "MySQL account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "respondWith": "json",
+                "responseBody": "={\n  \"status\": \"provisioned\",\n  \"username\": \"{{ $('Generate Credentials').item.json.da_username }}\",\n  \"domain\": \"{{ $('Generate Credentials').item.json.domain }}\",\n  \"login_url\": \"https://inqaba.dotnetz.co.za:2222\"\n}",
+                "options": {
+                    "responseCode": 200
+                }
+            },
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1.5,
+            "position": [
+                800,
+                300
+            ],
+            "id": "respond-webhook",
+            "name": "Respond to Webhook"
+        },
+        {
+            "parameters": {
+                "fromEmail": "hosting@mtronika.co.za",
+                "toEmail": "={{ $('Generate Credentials').item.json.client_email || $('Generate Credentials').item.json.client?.email }}",
+                "subject": "=🎉 Your Website Hosting is Ready! - {{ $('Generate Credentials').item.json.domain }}",
+                "html": "=<!DOCTYPE html>\n<html>\n<head>\n<meta charset=\"UTF-8\">\n<title>Hosting Credentials</title>\n</head>\n<body style=\"margin: 0; padding: 0; background-color: #f4f4f4; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;\">\n\n<div style=\"max-width: 600px; margin: 20px auto; background-color: #ffffff; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.05);\">\n\n    <div style=\"background-color: #28a745; padding: 25px; text-align: center;\">\n        <h2 style=\"color: #ffffff; margin: 0; font-size: 22px;\">🎉 Your Hosting is Ready!</h2>\n    </div>\n\n    <div style=\"padding: 30px; color: #333333; line-height: 1.6;\">\n        \n        <p>Hi {{ $('Generate Credentials').item.json.client?.first_name || 'there' }},</p>\n        \n        <p>Great news! Your website hosting for <strong>{{ $('Generate Credentials').item.json.domain }}</strong> has been set up successfully.</p>\n        \n        <div style=\"background-color: #f8f9fa; padding: 20px; border-radius: 6px; border-left: 4px solid #28a745; margin: 25px 0;\">\n            <h3 style=\"margin-top: 0; color: #28a745;\">🔐 Your Login Details</h3>\n            <table style=\"width: 100%; border-collapse: collapse;\">\n                <tr>\n                    <td style=\"padding: 8px 0; font-weight: bold; color: #555; width: 120px;\">Control Panel:</td>\n                    <td style=\"padding: 8px 0;\"><a href=\"https://inqaba.dotnetz.co.za:2222\" style=\"color: #007bff;\">inqaba.dotnetz.co.za:2222</a></td>\n                </tr>\n                <tr>\n                    <td style=\"padding: 8px 0; font-weight: bold; color: #555;\">Username:</td>\n                    <td style=\"padding: 8px 0; font-family: monospace; background: #eee; padding: 5px 10px; border-radius: 3px;\">{{ $('Generate Credentials').item.json.da_username }}</td>\n                </tr>\n                <tr>\n                    <td style=\"padding: 8px 0; font-weight: bold; color: #555;\">Password:</td>\n                    <td style=\"padding: 8px 0; font-family: monospace; background: #eee; padding: 5px 10px; border-radius: 3px;\">{{ $('Generate Credentials').item.json.da_password }}</td>\n                </tr>\n                <tr>\n                    <td style=\"padding: 8px 0; font-weight: bold; color: #555;\">Domain:</td>\n                    <td style=\"padding: 8px 0;\">{{ $('Generate Credentials').item.json.domain }}</td>\n                </tr>\n            </table>\n        </div>\n        \n        <div style=\"background-color: #fff3cd; padding: 15px; border-radius: 5px; border: 1px solid #ffeeba; font-size: 14px; margin-bottom: 20px;\">\n            <strong>⚠️ Important:</strong> Please save these credentials securely. We recommend changing your password after first login.\n        </div>\n\n        <div style=\"text-align: center; margin-top: 30px;\">\n            <a href=\"https://inqaba.dotnetz.co.za:2222\" \n               style=\"background-color: #007bff; color: white; padding: 14px 28px; text-decoration: none; border-radius: 50px; font-weight: bold; font-size: 16px; display: inline-block;\">\n               🔑 Login to Control Panel\n            </a>\n        </div>\n\n    </div>\n\n    <div style=\"background-color: #f4f4f4; padding: 15px; text-align: center; font-size: 12px; color: #888; border-top: 1px solid #e0e0e0;\">\n        <p style=\"margin: 5px 0;\">Need help? Reply to this email or WhatsApp us at 068 608 8321</p>\n        <p style=\"margin: 5px 0;\">&copy; 2026 Mtronika. All rights reserved.</p>\n    </div>\n\n</div>\n\n</body>\n</html>",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.emailSend",
+            "typeVersion": 2.1,
+            "position": [
+                800,
+                500
+            ],
+            "id": "send-email-client",
+            "name": "Send Email - Client Credentials",
+            "credentials": {
+                "smtp": {
+                    "id": "YOUR_SMTP_CREDENTIAL_ID",
+                    "name": "SMTP account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "content": "## WF-WD-HOSTING: DirectAdmin Provisioning\n\n**Purpose:** Create hosting account immediately after intake (runs parallel to design workflow)\n\n**Flow:**\n1. Receive hosting request via webhook\n2. Generate secure username + password\n3. Create DirectAdmin user account\n4. Enable Let's Encrypt SSL\n5. Update database with credentials\n6. Email client their login details\n\n**Server:** inqaba.dotnetz.co.za:2222",
+                "height": 320,
+                "width": 350,
+                "color": 3
+            },
+            "type": "n8n-nodes-base.stickyNote",
+            "position": [
+                -400,
+                20
+            ],
+            "typeVersion": 1,
+            "id": "sticky-note-1",
+            "name": "Sticky Note - Overview"
+        },
+        {
+            "parameters": {
+                "content": "## Credentials Needed\n\n1. **httpHeaderAuth** - API key for internal calls\n2. **httpBasicAuth** - DirectAdmin admin login\n3. **mySql** - Database connection\n4. **smtp** - Email sending\n\n**DirectAdmin Package:** iflame_growth",
+                "height": 200,
+                "width": 280,
+                "color": 4
+            },
+            "type": "n8n-nodes-base.stickyNote",
+            "position": [
+                0,
+                20
+            ],
+            "typeVersion": 1,
+            "id": "sticky-note-2",
+            "name": "Sticky Note - Credentials"
+        }
+    ],
+    "connections": {
+        "Webhook - Hosting Provision": {
+            "main": [
+                [
+                    {
+                        "node": "Generate Credentials",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Generate Credentials": {
+            "main": [
+                [
+                    {
+                        "node": "DirectAdmin - Create User",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "DirectAdmin - Create User": {
+            "main": [
+                [
+                    {
+                        "node": "DirectAdmin - Enable SSL",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "DirectAdmin - Enable SSL": {
+            "main": [
+                [
+                    {
+                        "node": "MySQL - Update Project",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "MySQL - Update Project": {
+            "main": [
+                [
+                    {
+                        "node": "Respond to Webhook",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "Send Email - Client Credentials",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "pinData": {},
+    "meta": {
+        "templateCredsSetupCompleted": false,
+        "instanceId": "mtronika-web-design-wf-wd-hosting"
+    }
+}
